@@ -34,6 +34,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     Make sure Python is installed
     $ python3 --version
     $ sudo su -
+    $ cd /root
     Make sure rcpy is installed
     # pip3 install rcpy --upgrade
     https://github.com/StrawsonDesign/librobotcontrol
