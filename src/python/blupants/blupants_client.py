@@ -7,6 +7,10 @@ import blupants_car
 
 global studio_url
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
+studio_url = "http://blupants.org"
+
+global local_ip
+local_ip = "127.0.0.1"
 
 global robot_id
 robot_id = 0  # mr_blupants / eduMIP
@@ -25,6 +29,8 @@ def execute_python_code(py):
     itemlist = str(py).split("\n")
     for s in itemlist:
         cmd = str(s)
+        if len(cmd) <= 0:
+            break
 
         if s == "move_forward()":
             if robot_id == 0:
@@ -75,6 +81,9 @@ def execute_python_code(py):
 
 
 def get_local_ip():
+    global local_ip
+    if local_ip != "127.0.0.1":
+        return local_ip
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(("10.255.255.255", 1))
@@ -88,12 +97,15 @@ def get_local_ip():
 
 def get_code():
     url = studio_url + "/api/v1/code"
-    local_ip = get_local_ip()
+    private_ip = get_local_ip()
     params = dict(
-        id=local_ip
+        id=private_ip
     )
-    resp = requests.get(url=url, params=params)
-    data = resp.json()
+    try:
+        resp = requests.get(url=url, params=params, timeout=5)
+        data = resp.json()
+    except:
+        data = ""
     # TODO change server to send the code type
     code = {"type": "python", "code": data}
     return code
@@ -104,7 +116,7 @@ def main():
     while running:
         print("Executing ...")
         code = get_code()
-        time.sleep(2)
+        time.sleep(1)
         if "type" in code:
             if code["type"] == "python":
                 if "code" in code:
