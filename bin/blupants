@@ -73,7 +73,7 @@ def main():
         print('    Verbose level: {}\n'.format(verbose_level))
 
     # run server in a separate thread
-    thread = threading.Thread(target=blupants.run(arg.module))
+    thread = threading.Thread(target=blupants.run(args.module))
     thread.start()
 
     try:
