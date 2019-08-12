@@ -103,5 +103,8 @@ def kitcken_lap():
     turn_left()
 
 
+def shutdown():
+    global running
+    running = False
 
 

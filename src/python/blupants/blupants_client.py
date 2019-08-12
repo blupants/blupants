@@ -2,8 +2,8 @@ import os
 import time
 import requests
 import socket
-import rc_balance_dstr
-import blupants_car
+import blupants.blupants_car as rc_balance_dstr
+import blupants.blupants_car as blupants_car
 
 global studio_url
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
@@ -32,6 +32,7 @@ def execute_python_code(py):
         if len(cmd) <= 0:
             break
 
+        # TODO: Refactoring - implement an interface and remove all those if robot_id == x statements
         if s == "move_forward()":
             if robot_id == 0:
                 rc_balance_dstr.move_block(step)
@@ -111,7 +112,17 @@ def get_code():
     return code
 
 
-def main():
+def shutdown():
+    global running
+    running = False
+    if robot_id == 0:
+        rc_balance_dstr.shutdown()
+    if robot_id == 1:
+        blupants_car.shutdown()
+
+
+def run():
+    global running
     running = True
     while running:
         print("Executing ...")
@@ -126,5 +137,11 @@ def main():
     print("Done!")
 
 
-main()
+def main():
+    return run()
+
+
+if __name__ == '__main__':
+    main()
+
 

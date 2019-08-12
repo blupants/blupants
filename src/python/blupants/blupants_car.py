@@ -195,11 +195,18 @@ def random_move(force=False):
             turn_right(rand)
 
 
+def shutdown():
+    global running
+    running = False
+
+
 def main():
+    global running
+    running = True
     print("Init")
 
     recovered_distance = distanceMeasurement(trigger, echo)
-    while True:
+    while running:
         #  TODO: implement stop condition to break the loop and execute the stop commands at the end
         if recovered_distance <= 0 or recovered_distance > 400:
             recovered_distance = 1.111
@@ -233,3 +240,7 @@ def main():
     # disable servos
     servo.disable()
     print("Done")
+
+
+if __name__ == '__main__':
+    main()
