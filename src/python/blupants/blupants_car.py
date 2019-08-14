@@ -49,6 +49,9 @@ period = 0.02
 
 motor1 = motor.Motor(1)
 motor2 = motor.Motor(2)
+motor3 = motor.Motor(3)
+motor4 = motor.Motor(4)
+
 
 servo_hor = servo.Servo(1)
 servo_vert = servo.Servo(2)
@@ -138,27 +141,43 @@ def move_block(blocks):
 
     motor1.set(d)
     motor2.set(d)
+    motor3.set(d)
+    motor4.set(d)
 
     time.sleep(interval * blocks)
 
     motor1.set(0)
     motor2.set(0)
+    motor3.set(0)
+    motor4.set(0)
 
 
 def turn_right(angle=90):
     look_angle(angle* -1)
     print("turn_right()".format(angle))
     motor1.set(duty)
+    motor2.set(duty*-1)
+    motor3.set(duty*-1)
+    motor4.set(duty)
     time.sleep(0.0077777 * angle)
     motor1.set(0)
+    motor2.set(0)
+    motor3.set(0)
+    motor4.set(0)
 
 
 def turn_left(angle=90):
     look_angle(angle)
     print("turn_left({})".format(angle))
+    motor1.set(duty*-1)
     motor2.set(duty)
+    motor3.set(duty)
+    motor4.set(duty*-1)
     time.sleep(0.0077777 * angle)
+    motor1.set(0)
     motor2.set(0)
+    motor3.set(0)
+    motor4.set(0)
 
 
 def forward(blocks=1):
