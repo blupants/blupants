@@ -3,10 +3,11 @@ echo "Robot init script..."
 
 /usr/bin/rc_test_leds
 
-echo "Waiting 60 seconds for network setup."
-sleep 60
+echo "Waiting 30 seconds for network setup."
+sleep 30
 
-/usr/bin/rc_test_leds
+/usr/bin/rc_blink &
+sleep 5
 
 /usr/bin/rc_balance_dstr -i dstr &
 echo "Ready to start blupants_client."

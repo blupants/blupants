@@ -33,6 +33,12 @@ def execute_python_code(py):
             break
 
         # TODO: Refactoring - implement an interface and remove all those if robot_id == x statements
+        if s == "shutdown()":
+            os.system("/usr/bin/rc_test_leds")
+            time.sleep(5)
+            shutdown()
+            time.sleep(5)
+            os.system("poweroff")
         if s == "move_forward()":
             if robot_id == 0:
                 rc_balance_dstr.move_block(step)
