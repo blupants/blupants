@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import socket
-import blupants.blupants_car as rc_balance_dstr
+import blupants.rc_balance_dstr as rc_balance_dstr
 import blupants.blupants_car as blupants_car
 
 global studio_url
