@@ -33,6 +33,11 @@ def execute_python_code(py):
             break
 
         # TODO: Refactoring - implement an interface and remove all those if robot_id == x statements
+        if s == "claw()" or s == "claw_toggle()" or s == "claw_open()" or s == "claw_close()":
+            if robot_id == 0:
+                rc_balance_dstr.claw_toggle()
+            if robot_id == 1:
+                blupants_car.claw_toggle()
         if s == "shutdown()":
             os.system("/usr/bin/rc_test_leds")
             time.sleep(5)

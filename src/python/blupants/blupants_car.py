@@ -9,6 +9,9 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 import random
 
+global grab
+grab = False
+
 GPIO.cleanup()
 
 
@@ -55,8 +58,11 @@ motor4 = motor.Motor(4)
 
 servo_hor = servo.Servo(1)
 servo_vert = servo.Servo(2)
+servo_claw = servo.Servo(8)
 clckh = clock.Clock(servo_hor, period)
 clckv = clock.Clock(servo_vert, period)
+clckc = clock.Clock(servo_claw, period)
+
 
 rcpy.set_state(rcpy.RUNNING)
 # enable servos
@@ -65,6 +71,7 @@ servo.enable()
 # start clock
 clckh.start()
 clckv.start()
+clckc.start()
 
 
 def distanceMeasurement(TRIG,ECHO):
@@ -84,6 +91,22 @@ def distanceMeasurement(TRIG,ECHO):
     distance = pulse_duration * 17150
     distance = round(distance, 2)
     return distance
+
+
+def claw_toggle():
+    global grab
+    if grab:
+        print("grab()")
+        grab = False
+        angle = 89.0
+    else:
+        print("release()")
+        grab = True
+        angle = -89.00
+    time.sleep(0.2)
+    position = angle * 0.015
+    servo_claw.set(position)
+    time.sleep(0.2)
 
 
 def look_back():
@@ -255,6 +278,7 @@ def main():
     # stop clock
     clckh.stop()
     clckv.stop()
+    clckc.stop()
 
     # disable servos
     servo.disable()

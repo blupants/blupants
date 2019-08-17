@@ -41,6 +41,10 @@ def _create_cmd_file(cmd):
     open(file_path, 'a').close()
 
 
+def claw_toggle():
+    print("claw_toggle()")
+
+
 def move_forward(distance_meter = 1.0):
     global meter_coefficient
     print ("Moving forward")
