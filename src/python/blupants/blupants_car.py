@@ -32,9 +32,12 @@ interval = 2
 period = 0.02
 turn_left_calibrate = 0.0052
 turn_right_calibrate = 0.0053
+duty_lr_ratio = 1.0
 if "blupants_car" in config:
     if "duty" in config["blupants_car"]:
         duty = config["blupants_car"]["duty"]
+    if "duty_lr_ratio" in config["blupants_car"]:
+        duty_lr_ratio = config["blupants_car"]["duty_lr_ratio"]
     if "interval" in config["blupants_car"]:
         interval = config["blupants_car"]["interval"]
     if "period" in config["blupants_car"]:
@@ -76,8 +79,8 @@ time.sleep(0.5)
 TRIG = trigger
 
 
-motor1 = motor.Motor(1)
-motor2 = motor.Motor(2)
+motor1 = motor.Motor(1) # Left
+motor2 = motor.Motor(2) # Right
 motor3 = motor.Motor(3)
 motor4 = motor.Motor(4)
 
@@ -188,10 +191,10 @@ def move_block(blocks):
         d = d * -1
         blocks = blocks * -1
 
-    motor1.set(d)
+    motor1.set(d * duty_lr_ratio)
     motor2.set(d)
     motor3.set(d)
-    motor4.set(d)
+    motor4.set(d * duty_lr_ratio)
 
     time.sleep(interval * blocks)
 
