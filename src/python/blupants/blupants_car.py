@@ -1,3 +1,5 @@
+import os
+import json
 import rcpy
 import rcpy.motor as motor
 import rcpy.servo as servo
@@ -12,7 +14,35 @@ import random
 global grab
 grab = True
 
+global config_file
+config_file = "/root/blupants.json"
+
+global config
+
 GPIO.cleanup()
+
+config = {}
+if os.path.isfile(config_file):
+    with open(config_file) as f:
+        config = json.load(f)
+        print(config)
+
+duty = 0.3
+interval = 2
+period = 0.02
+turn_left_calibrate = 0.0052
+turn_right_calibrate = 0.0053
+if "blupants_car" in config:
+    if "duty" in config["blupants_car"]:
+        duty = config["blupants_car"]["duty"]
+    if "interval" in config["blupants_car"]:
+        interval = config["blupants_car"]["interval"]
+    if "period" in config["blupants_car"]:
+        period = config["blupants_car"]["period"]
+    if "turn_left_calibrate" in config["blupants_car"]:
+        turn_left_calibrate = config["blupants_car"]["turn_left_calibrate"]
+    if "turn_right_calibrate" in config["blupants_car"]:
+        turn_right_calibrate = config["blupants_car"]["turn_right_calibrate"]
 
 
 #0
@@ -45,10 +75,6 @@ GPIO.output(trigger, False)
 time.sleep(0.5)
 TRIG = trigger
 
-
-duty = 0.3
-interval = 2
-period = 0.02
 
 motor1 = motor.Motor(1)
 motor2 = motor.Motor(2)
@@ -182,7 +208,7 @@ def turn_right(angle=90):
     motor2.set(duty*-1)
     motor3.set(duty*-1)
     motor4.set(duty)
-    time.sleep(0.0077777 * angle)
+    time.sleep(turn_right_calibrate * angle)
     motor1.set(0)
     motor2.set(0)
     motor3.set(0)
@@ -196,7 +222,7 @@ def turn_left(angle=90):
     motor2.set(duty)
     motor3.set(duty)
     motor4.set(duty*-1)
-    time.sleep(0.0077777 * angle)
+    time.sleep(turn_left_calibrate * angle)
     motor1.set(0)
     motor2.set(0)
     motor3.set(0)
