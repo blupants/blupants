@@ -4,7 +4,7 @@ global module_name
 module_name = ""
 
 def version():
-    return "1.0.0a2"
+    return "1.0.0a3"
 
 
 def verbose(verbose_level):
