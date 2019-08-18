@@ -10,7 +10,7 @@ import time
 import random
 
 global grab
-grab = False
+grab = True
 
 GPIO.cleanup()
 
