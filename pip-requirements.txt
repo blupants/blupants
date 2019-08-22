@@ -5,3 +5,4 @@ pycrypto
 requests
 flask
 flask-restful
+opencv-python
