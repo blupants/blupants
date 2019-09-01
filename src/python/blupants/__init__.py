@@ -4,7 +4,7 @@ global module_name
 module_name = ""
 
 def version():
-    return "1.0.0a4"
+    return "1.0.0a5"
 
 
 def verbose(verbose_level):
@@ -19,7 +19,4 @@ def run(module):
 
 
 def shutdown():
-    global module_name
-    module_name = module
-    if module_name == "blupants_client":
-        blupants_client.shutdown()
+    blupants_client.shutdown()

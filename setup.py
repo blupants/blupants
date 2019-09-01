@@ -22,7 +22,7 @@ else:
 
 setup(
     name=DEFAULT_NAME,
-    version="1.0.0a4",
+    version="1.0.0a5",
     module_name=DEFAULT_NAME,
     python_requires='>=3.4',
     author="BluPants",

@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+def main():
+    import qrcode_wifi
+    try:
+        qrcode_wifi.run()
+    except:
+        sys.exit(0)
+
+
+if __name__ == "__main__":
+
+    main()

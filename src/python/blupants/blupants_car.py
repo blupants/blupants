@@ -183,6 +183,7 @@ def say_no():
     time.sleep(0.4)
     servo_hor.set(0)
     time.sleep(0.2)
+    look_angle(0)
 
 
 def move_block(blocks):
@@ -269,6 +270,13 @@ def random_move(force=False):
 def shutdown():
     global running
     running = False
+    # stop clock
+    clckh.stop()
+    clckv.stop()
+    clckc.stop()
+
+    # disable servos
+    servo.disable()
 
 
 def main():
@@ -304,13 +312,7 @@ def main():
             random_move(force=True)
         recovered_distance = distanceMeasurement(trigger, echo)
 
-    # stop clock
-    clckh.stop()
-    clckv.stop()
-    clckc.stop()
-
-    # disable servos
-    servo.disable()
+    shutdown()
     print("Done")
 
 
