@@ -22,7 +22,7 @@ else:
 
 setup(
     name=DEFAULT_NAME,
-    version="1.0.0a5",
+    version="1.0.0a6",
     module_name=DEFAULT_NAME,
     python_requires='>=3.4',
     author="BluPants",
@@ -36,6 +36,7 @@ setup(
     install_requires=reqs,
     include_package_data=True,
     scripts=[
-        "bin/blupants"
+        "bin/blupants",
+        "bin/qrcode_wifi"
     ]
 )
