@@ -36,7 +36,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     $ sudo su -
     $ cd /root
     Make sure rcpy is installed
-    # pip3 install rcpy --upgrade
+    # python3 -m pip install rcpy --upgrade
     https://github.com/StrawsonDesign/librobotcontrol
     # git clone git@github.com:blupants/blupants.git
     # git clone https://github.com/StrawsonDesign/librobotcontrol.git
@@ -48,5 +48,6 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cp ./blupants/src/c/start.sh /etc/robotcontrol
     # rm /etc/robotcontrol/link_to_startup_program
     # ln -s /etc/robotcontrol/start.sh /etc/robotcontrol/link_to_startup_program
+    # python3 -m pip install blupants --upgrade
     # /etc/robotcontrol/link_to_startup_program
     

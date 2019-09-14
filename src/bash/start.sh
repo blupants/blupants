@@ -4,7 +4,11 @@ echo "Robot init script..."
 /usr/bin/rc_test_leds
 
 echo "Waiting 30 seconds for network interface startup..."
-sleep 30
+sleep 15
+
+motion &
+
+sleep 15
 
 /usr/bin/rc_test_leds
 
