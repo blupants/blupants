@@ -1,18 +1,18 @@
-# BluPants: Open Source robot programming
+# BluPants: Agnostic Programming Platform for Robots
 
 BluPants is a Python based module to control robots and IoT automation devices via [BluPants Coding Lab](https://blupants.org). Visit https://blupants.com for more details.
 
 The Project goal is make robotics and programming available to anyone. 
 
 ## Welcome
-Let's build an open source community for any child across the globe from the age of 5 to 99.
+Let's build a community for any child across the globe from the age of 5 to 99.
 Together we can build the tools to make the journey to STEM accessible to anyone.
 
-Open source hardware and software can make it affordable, at the same time we give unlimited flexibility to expand BluPants as far as the human imagination can go.
+Compatibility with a variety of existing robotics hardware can make it affordable, at the same time we give unlimited flexibility to expand BluPants as far as the human imagination can go.
 
 
 ## Dependencies
-BluPants is based exclusively on open source solution:
+BluPants is based on the following projects:
 
 [BeagleBoneBlue](https://beagleboard.org/blue)
 
@@ -23,8 +23,6 @@ Robot Control Library - [documentation](http://strawsondesign.com/docs/librobotc
 RCPy - [documentation](https://guitar.ucsd.edu/rcpy/html/index.html) / [Github](https://github.com/mcdeoliveira/rcpy)
 
 [Blockly](https://developers.google.com/blockly/)
-
-[Scratch](https://scratch.mit.edu)
 
 
 ## Deployment
