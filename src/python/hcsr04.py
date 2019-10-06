@@ -11,7 +11,7 @@ vcc = "5V"
 # white wire
 trigger = "GPIO1_25"
 
-# blue wire using resitor
+# blue wire using resistor
 echo = "P9_23" #echo = "GPIO1_17"
 
 # black wire
