@@ -103,6 +103,48 @@ clckv.start()
 clckc.start()
 
 
+def move_forward(step=1):
+    return forward(step)
+
+
+def move_backwards(step=1):
+    return backward(step)
+
+
+def claw_toggle():
+    global grab
+    if grab:
+        claw_close()
+    else:
+        claw_open()
+
+
+def claw():
+    return claw_toggle()
+
+
+def claw_open():
+    global grab
+    print("release()")
+    grab = True
+    angle = -89.00
+    time.sleep(0.2)
+    position = angle * 0.015
+    servo_claw.set(position)
+    time.sleep(0.2)
+
+
+def claw_close():
+    global grab
+    print("grab()")
+    grab = False
+    angle = 89.0
+    time.sleep(0.2)
+    position = angle * 0.015
+    servo_claw.set(position)
+    time.sleep(0.2)
+
+
 def distanceMeasurement(TRIG,ECHO):
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
@@ -120,22 +162,6 @@ def distanceMeasurement(TRIG,ECHO):
     distance = pulse_duration * 17150
     distance = round(distance, 2)
     return distance
-
-
-def claw_toggle():
-    global grab
-    if grab:
-        print("grab()")
-        grab = False
-        angle = 89.0
-    else:
-        print("release()")
-        grab = True
-        angle = -89.00
-    time.sleep(0.2)
-    position = angle * 0.015
-    servo_claw.set(position)
-    time.sleep(0.2)
 
 
 def look_back():
