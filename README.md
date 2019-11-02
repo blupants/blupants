@@ -43,9 +43,22 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cd librobotcontrol
     # make
     # cp ./examples/bin/rc_balance /usr/bin/rc_balance_dstr
-    # cp ./blupants/src/c/start.sh /etc/robotcontrol
+    # cd
+    # cp ./blupants/src/bash/start.sh /etc/robotcontrol
     # rm /etc/robotcontrol/link_to_startup_program
     # ln -s /etc/robotcontrol/start.sh /etc/robotcontrol/link_to_startup_program
     # python3 -m pip install blupants --upgrade
+    # git clone https://github.com/brgl/libgpiod
+    # cd libgpiod
+    # apt-get install autoconf-archive
+    # ./autogen.sh --enable-tools=yes --enable-bindings-python --prefix=/usr/local
+    # make
+    # make install
+    # mv /usr/local/lib/python3.5/site-packages/* /usr/local/lib/python3.5/dist-packages/.
+    # echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
+    # cd
+    # chmod +x /etc/robotcontrol/link_to_startup_program
+    # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
+    # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
     # /etc/robotcontrol/link_to_startup_program
     
