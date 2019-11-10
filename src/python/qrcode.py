@@ -1,7 +1,7 @@
 import cv2
 import time
 
-max_tries = 100
+max_tries = 30
 index = 0
 apiPreference = cv2.CAP_ANY
 
@@ -12,7 +12,7 @@ time.sleep(1)
 
 # Check if camera opened successfully
 if cap.isOpened():
-    cap.set(cv2.CAP_PROP_FPS, 30)
+    cap.set(cv2.CAP_PROP_FPS, 1)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
     time.sleep(1)
@@ -28,7 +28,7 @@ while cap.isOpened():
     print(count)
     if ret:
         data, bbox, rectified_image = qr_decoder.detectAndDecode(frame)
-        # cv2.imwrite("/root/capture/{}.png".format(str(count).zfill(4)), frame)
+        # cv2.imwrite("/tmp/blupants/{}.png".format(str(count).zfill(4)), frame)
         if len(data) > 0:
             print("Decoded Data : {}".format(data))
             break

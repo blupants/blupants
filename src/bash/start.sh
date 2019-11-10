@@ -6,21 +6,15 @@ echo "Robot init script..."
 echo "Waiting 30 seconds for network interface startup..."
 sleep 15
 
-mkdir -p /tmp/motion
+mkdir -p /tmp/blupants
+mount -t tmpfs -o size=20M,mode=0755 tmpfs /tmp/blupants
+echo "print(\"RPC module resetting...\")" > /tmp/blupants/blupants_rpc.py
 
-sleep 5
+sleep 10
 
 if ls /dev/video* 1> /dev/null 2>&1; then
-	echo "Initializing video capture..."
-	/usr/bin/motion &
-
-	sleep 10
-
-	/usr/bin/rc_test_leds
-
 	echo "QR Code WiFi setup..."
 	/usr/local/bin/qrcode_wifi
-
 	sleep 5
 else
 	echo "Video device not found. Skipping video capture."
