@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+
+from flask import Flask, Response
+import time
+import os
+import json
+
+use_opencv = False
+img_path = "/tmp/blupants/t.png"
+shutdown_file = "/tmp/blupants/shutdown"
+
+global config_file
+config_file = "/root/blupants.json"
+global config
+config = {}
+
+if os.path.isfile(config_file):
+    with open(config_file) as f:
+        config = json.load(f)
+        print(config)
+
+if "use_opencv" in config:
+    use_opencv = config["use_opencv"]
+
+app = Flask(__name__)
+
+
+def gen():
+    import cv2
+    video = cv2.VideoCapture(0)
+    if video.isOpened():
+        video.set(cv2.CAP_PROP_FPS, 1)
+        video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        video.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+        time.sleep(1)
+    """Video streaming generator function."""
+    while True:
+        rval, frame = video.read()
+        cv2.imwrite(img_path, frame)
+        yield b'--frame\r\nContent-Type: image/png\r\n\r\n' + open(img_path, 'rb').read() + b'\r\n'
+        time.sleep(0.5)
+        if os.path.isfile(shutdown_file):
+            break
+    video.release()
+    print("Finished streaming.")
+    cmd = "rm {}".format(shutdown_file)
+    os.system(cmd)
+    time.sleep(1)
+
+
+@app.route('/')
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+if __name__ == '__main__':
+    if use_opencv:
+        #app.run(host='0.0.0.0', debug=True, threaded=True)
+        app.run(host='0.0.0.0', port="8081")
+    else:
+        cmd = "/usr/bin/motion"
+        os.system(cmd)

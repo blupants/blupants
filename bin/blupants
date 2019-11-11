@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 def one_line_warning(message, category, filename, lineno, line=None):
     return " {}:{}: {}:{}\n".format(filename, lineno, category.__name__, message)

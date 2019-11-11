@@ -37,6 +37,7 @@ setup(
     include_package_data=True,
     scripts=[
         "bin/blupants",
-        "bin/qrcode_wifi"
+        "bin/qrcode_wifi",
+        "bin/video_stream"
     ]
 )
