@@ -143,10 +143,10 @@ def run(max_tries=-1):
     else:
         print("Error opening video stream or file")
 
-    pos_begin = -0.6
-    pos_end = 0.6
+    pos_begin = -0.3
+    pos_end = 0.3
     step = 0.1
-    pos_v = pos_h = pos_begin
+    pos_v = pos_h = 0
     counter = 0
     # Read until video is completed
     while cap.isOpened():
@@ -159,27 +159,37 @@ def run(max_tries=-1):
         # Capture frame-by-frame
         ret, frame = cap.read()
         if ret:
-            data, bbox, rectified_image = qr_decoder.detectAndDecode(frame)
-            # cv2.imwrite("/tmp/blupants/{}.png".format(str(count).zfill(4)), frame)
-            if len(data) > 0:
-                print("Decoded Data : {}".format(data))
-                set_config(data)
-                time.sleep(2)
-                if wifi_connected():
-                    print("Successfully connected to WiFi.")
-                    break
-            else:
-                print("QR Code not detected")
+            try:
+                data, bbox, rectified_image = qr_decoder.detectAndDecode(frame)
+                # cv2.imwrite("/tmp/blupants/{}.png".format(str(count).zfill(4)), frame)
+                if len(data) > 0:
+                    print("Decoded Data : {}".format(data))
+                    set_config(data)
+                    time.sleep(2)
+                    if wifi_connected():
+                        print("Successfully connected to WiFi.")
+                        break
+                else:
+                    print("QR Code not detected")
+            except:
+                ret = False
+                pass
         if 0 < max_tries <= counter:
             print("Unable to connected to WiFi.")
             break
-        # Servo sweep
-        pos_h += step
-        if pos_h > pos_end:
-            pos_h = pos_begin
-            pos_v += step
-            if pos_v > pos_end:
-                pos_v = pos_begin
+        if ret:
+            # Servo sweep
+            if pos_h > pos_end:
+                pos_h = pos_begin
+                pos_v += step
+                if pos_v > pos_end:
+                    pos_v = pos_begin
+            else:
+                pos_h += step
+        else:
+            servo_vert.set(pos_v*-1)
+            servo_hor.set(pos_h*-1)
+            time.sleep(2)
     cap.release()
     print("Done!")
 
