@@ -85,22 +85,28 @@ motor3 = motor.Motor(3)
 motor4 = motor.Motor(4)
 
 
-servo_hor = servo.Servo(1)
-servo_vert = servo.Servo(2)
-servo_claw = servo.Servo(8)
-clckh = clock.Clock(servo_hor, period)
-clckv = clock.Clock(servo_vert, period)
-clckc = clock.Clock(servo_claw, period)
+blupants_servos = [servo.Servo(1), servo.Servo(2), servo.Servo(3), servo.Servo(4), servo.Servo(5), servo.Servo(6),
+                   servo.Servo(7), servo.Servo(8)]
+
+clcks = [clock.Clock(blupants_servos[0], period), clock.Clock(blupants_servos[1], period),
+         clock.Clock(blupants_servos[2], period), clock.Clock(blupants_servos[3], period),
+         clock.Clock(blupants_servos[4], period), clock.Clock(blupants_servos[5], period),
+         clock.Clock(blupants_servos[6], period), clock.Clock(blupants_servos[7], period)]
 
 
 rcpy.set_state(rcpy.RUNNING)
 # enable servos
 servo.enable()
 
-# start clock
-clckh.start()
-clckv.start()
-clckc.start()
+
+for i in range(0, 8):
+    clcks[i].start()
+
+
+def read_distance():
+    distance = distanceMeasurement(trigger, echo)
+    print("Distance: [{}] cm.".format(str(distance)))
+    return distance
 
 
 def move_forward(step=1):
@@ -109,6 +115,18 @@ def move_forward(step=1):
 
 def move_backwards(step=1):
     return backward(step)
+
+
+def set_servo(i=1, angle=0):
+    print("set_servo({}, {})".format(i, angle))
+    time.sleep(0.2)
+    if angle > 0 and angle > 90:
+        angle = 90
+    if angle < 0 and angle < -90:
+        angle = -90
+    position = angle * 0.015
+    blupants_servos[i-1].set(position)
+    time.sleep(0.2)
 
 
 def claw_toggle():
@@ -130,7 +148,7 @@ def claw_open():
     angle = -89.00
     time.sleep(0.2)
     position = angle * 0.015
-    servo_claw.set(position)
+    blupants_servos[7].set(position)
     time.sleep(0.2)
 
 
@@ -141,7 +159,7 @@ def claw_close():
     angle = 89.0
     time.sleep(0.2)
     position = angle * 0.015
-    servo_claw.set(position)
+    blupants_servos[7].set(position)
     time.sleep(0.2)
 
 
@@ -166,7 +184,7 @@ def distanceMeasurement(TRIG,ECHO):
 
 def look_back():
     print("look_back()")
-    servo_vert.set(-1.5)
+    blupants_servos[1].set(-1.5)
     time.sleep(0.2)
 
 
@@ -178,36 +196,36 @@ def look_angle(angle=90):
     if angle < 0 and angle < -90:
         angle = -90
     position = angle * 0.015
-    servo_hor.set(position)
-    servo_vert.set(0)
+    blupants_servos[0].set(position)
+    blupants_servos[1].set(0)
     time.sleep(0.2)
 
 
 def say_yes():
     print("say_yes()")
-    servo_vert.set(0)
+    blupants_servos[1].set(0)
     time.sleep(0.2)
-    servo_vert.set(1.5)
+    blupants_servos[1].set(1.5)
     time.sleep(0.2)
-    servo_vert.set(-1.5)
+    blupants_servos[1].set(-1.5)
     time.sleep(0.2)
-    servo_vert.set(1.5)
+    blupants_servos[1].set(1.5)
     time.sleep(0.2)
-    servo_vert.set(0)
+    blupants_servos[1].set(0)
     time.sleep(0.2)
 
 
 def say_no():
     print("say_no()")
-    servo_vert.set(0)
+    blupants_servos[1].set(0)
     time.sleep(0.2)
-    servo_hor.set(0)
+    blupants_servos[0].set(0)
     time.sleep(0.4)
-    servo_hor.set(1.5)
+    blupants_servos[0].set(1.5)
     time.sleep(0.2)
-    servo_hor.set(-1.4)
+    blupants_servos[0].set(-1.4)
     time.sleep(0.4)
-    servo_hor.set(0)
+    blupants_servos[0].set(0)
     time.sleep(0.2)
     look_angle(0)
 
@@ -232,7 +250,6 @@ def move_block(blocks):
 
 
 def turn_right(angle=90):
-    look_angle(angle* -1)
     print("turn_right()".format(angle))
     motor1.set(duty)
     motor2.set(duty*-1)
@@ -246,7 +263,6 @@ def turn_right(angle=90):
 
 
 def turn_left(angle=90):
-    look_angle(angle)
     print("turn_left({})".format(angle))
     motor1.set(duty*-1)
     motor2.set(duty)
@@ -261,10 +277,6 @@ def turn_left(angle=90):
 
 def forward(blocks=1):
     print("forward({})".format(blocks))
-    if blocks > 0:
-        look_angle(0)
-    else:
-        look_back()
     return move_block(blocks)
 
 
@@ -297,9 +309,8 @@ def shutdown():
     global running
     running = False
     # stop clock
-    clckh.stop()
-    clckv.stop()
-    clckc.stop()
+    for i in range(0, 8):
+        clcks[i].stop()
 
     # disable servos
     servo.disable()
