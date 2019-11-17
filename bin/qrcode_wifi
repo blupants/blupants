@@ -143,10 +143,12 @@ def run(max_tries=-1):
     else:
         print("Error opening video stream or file")
 
-    pos_begin = -0.3
-    pos_end = 0.3
+    pos_h_begin = -0.3
+    pos_v_begin = 0
+    pos_end = 0.4
     step = 0.1
-    pos_v = pos_h = 0
+    pos_v = pos_v_begin
+    pos_h = pos_h_begin
     counter = 0
     # Read until video is completed
     while cap.isOpened():
@@ -180,10 +182,10 @@ def run(max_tries=-1):
         if ret:
             # Servo sweep
             if pos_h > pos_end:
-                pos_h = pos_begin
+                pos_h = pos_h_begin
                 pos_v += step
                 if pos_v > pos_end:
-                    pos_v = pos_begin
+                    pos_v = pos_v_begin
             else:
                 pos_h += step
         else:
