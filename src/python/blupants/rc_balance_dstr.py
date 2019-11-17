@@ -1,5 +1,7 @@
 import os
 import time
+import blupants.blupants_car as blupants_car
+
 
 # TODO this is a temporary workaround while we can't get pyctrl module to work: https://github.com/mcdeoliveira/pyctrl
 # This module will br replaced the edumip.py
@@ -31,6 +33,9 @@ global var_dir
 var_dir = os.path.join(os.sep, "tmp")
 
 
+global grab
+grab = True
+
 print("Make sure you have eduMPI balanced before running this script.")
 print("#rc_balance_dstr -i dstr")
 
@@ -41,8 +46,70 @@ def _create_cmd_file(cmd):
     open(file_path, 'a').close()
 
 
+def read_distance():
+    return blupants_car.read_distance()
+
+
+def set_servo(i=1, angle=0):
+    return blupants_car.set_servo(i, angle)
+
+
 def claw_toggle():
-    print("claw_toggle()")
+    global grab
+    if grab:
+        claw_close()
+    else:
+        claw_open()
+
+
+def claw():
+    return claw_toggle()
+
+
+def claw_open():
+    global grab
+    print("release()")
+    grab = True
+    blupants_car.set_servo(6, 45)
+    blupants_car.set_servo(7, -45)
+
+
+def claw_close():
+    global grab
+    print("grab()")
+    grab = False
+    blupants_car.set_servo(6, -30)
+    blupants_car.set_servo(7, 30)
+
+
+def say_no():
+    print("say_no()")
+    blupants_car.set_servo(7, 0)
+    blupants_car.set_servo(6, 0)
+    time.sleep(0.2)
+    blupants_car.set_servo(6, -45)
+    blupants_car.set_servo(7, -45)
+    time.sleep(0.2)
+    blupants_car.set_servo(7, 45)
+    blupants_car.set_servo(6, 45)
+    time.sleep(0.2)
+    blupants_car.set_servo(6, 0)
+    blupants_car.set_servo(7, 0)
+
+
+def say_yes():
+    print("say_yes()")
+    blupants_car.set_servo(7, 0)
+    blupants_car.set_servo(6, 0)
+    time.sleep(0.2)
+    blupants_car.set_servo(6, 80)
+    blupants_car.set_servo(7, -80)
+    time.sleep(0.2)
+    blupants_car.set_servo(7, 80)
+    blupants_car.set_servo(6, -80)
+    time.sleep(0.2)
+    blupants_car.set_servo(6, 0)
+    blupants_car.set_servo(7, 0)
 
 
 def move_forward(distance_meter = 1.0):
@@ -61,6 +128,10 @@ def move_back(distance_meter = 1.0):
     time.sleep(meter_coefficient*distance_meter)
     _create_cmd_file("break.txt.")
     time.sleep(2)
+
+
+def move_backwards(step=1):
+    return move_back(step)
 
 
 def turn_left(degree = 90.0):
@@ -96,19 +167,9 @@ def spin_360():
     turn_left()
 
 
-def kitcken_lap():
-    move_forward(1.2)
-    turn_left()
-    move_forward(2.1)
-    turn_left()
-    move_forward(1.2)
-    turn_left()
-    move_forward(2.1)
-    turn_left()
-
-
 def shutdown():
     global running
     running = False
+    blupants_car.shutdown()
 
 
