@@ -103,6 +103,29 @@ for i in range(0, 8):
     clcks[i].start()
 
 
+global camera_pos
+camera_pos = 0
+camera_toggle_postions = [[-89.0, 0], [89.0, 0],
+                          [89.0, 30.0], [0, 30.0], [-89.0, 30.0],
+                          [-89.0, 0],
+                          [-89.0, -30.0], [0, -30.0], [89.0, -30.0],
+                          [89.0, 0], [0, 0]]
+
+
+def camera_toggle():
+    global camera_pos
+    max = len(camera_toggle_postions)
+    if camera_pos >= max:
+        camera_pos = 0
+    pos = camera_toggle_postions[camera_pos]
+    time.sleep(0.2)
+    set_servo(1, pos[0])
+    time.sleep(0.2)
+    set_servo(2, pos[1])
+    time.sleep(0.2)
+    camera_pos += 1
+
+
 def read_distance():
     distance = distanceMeasurement(trigger, echo)
     print("Distance: [{}] cm.".format(str(distance)))
