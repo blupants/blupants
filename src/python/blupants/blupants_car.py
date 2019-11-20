@@ -126,6 +126,11 @@ def camera_toggle():
     camera_pos += 1
 
 
+def sleep(seconds=1.0):
+    print("sleep(sconds={})".format(seconds))
+    time.sleep(seconds)
+
+
 def read_distance():
     distance = distanceMeasurement(trigger, echo)
     print("Distance: [{}] cm.".format(str(distance)))
@@ -138,6 +143,18 @@ def move_forward(step=1):
 
 def move_backwards(step=1):
     return backward(step)
+
+
+def set_motor(i=1, duty=0.5):
+    print("set_motor(i={}, duty={})".format(i, duty))
+    if i == 1:
+        motor1.set(duty)
+    if i == 2:
+        motor2.set(duty)
+    if i == 3:
+        motor3.set(duty)
+    if i == 4:
+        motor4.set(duty)
 
 
 def set_servo(i=1, angle=0):

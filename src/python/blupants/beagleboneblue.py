@@ -128,7 +128,7 @@ class BeagleBoneBlue:
         # disable servos
         servo.disable()
 
-    def sleep(self, seconds=1):
+    def sleep(self, seconds=1.0):
         print("sleep(sconds={})".format(seconds))
         time.sleep(seconds)
 
@@ -146,7 +146,6 @@ class BeagleBoneBlue:
     def set_motor(self, i=1, duty=0.5):
         print("set_motor(i={}, duty={})".format(i, duty))
         self.motors[i - 1].set(duty)
-        pass
 
 
 class BluPants(BeagleBoneBlue):

@@ -46,6 +46,10 @@ def _create_cmd_file(cmd):
     open(file_path, 'a').close()
 
 
+def sleep(seconds=1.0):
+    return blupants_car.sleep(seconds)
+
+
 def read_distance():
     return blupants_car.read_distance()
 
