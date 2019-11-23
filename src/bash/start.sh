@@ -32,6 +32,7 @@ sleep 5
 
 /usr/bin/rc_balance_dstr -i dstr &
 echo "Ready to start blupants_client!"
-/usr/local/bin/blupants -m blupants_client > /dev/null 2>&1
+#/usr/local/bin/blupants -m blupants_client > /dev/null 2>&1
+python3 /usr/local/lib/python3.5/dist-packages/blupants/blupants_client.py
 
 echo "BluPants running..."

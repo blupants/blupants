@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+        var eventSource = new EventSource("/stdout_stream");
+        eventSource.onmessage = function(e) {
+          document.getElementById("panel").innerText = e.data;
+        };
+    </script>
+   <p id="panel" style="color:#7FBFE9">Click play button to connect.</p>
+  </body>
+</html>

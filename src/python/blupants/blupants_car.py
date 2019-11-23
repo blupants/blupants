@@ -19,6 +19,27 @@ config_file = "/root/blupants.json"
 
 global config
 
+
+class BluPantsConsole:
+    def __init__(self):
+        self.buffer = []
+
+    def get_stdout(self):
+        data = ""
+        for message in self.buffer:
+            data += message + "\n"
+        return data + "\n"
+
+    def print(self, message):
+        print(message)
+        if len(self.buffer) >= 6:
+            self.buffer = self.buffer[1:]
+        self.buffer.append("data:" + str(message))
+
+global standard_output
+standard_output = BluPantsConsole()
+
+
 GPIO.cleanup()
 
 config = {}
@@ -103,6 +124,16 @@ for i in range(0, 8):
     clcks[i].start()
 
 
+def get_stdout():
+    global standard_output
+    return standard_output.get_stdout()
+
+
+def print_stdout(message):
+    global standard_output
+    standard_output.print(message)
+
+
 global camera_pos
 camera_pos = 0
 camera_toggle_postions = [[-89.0, 0], [89.0, 0],
@@ -127,13 +158,15 @@ def camera_toggle():
 
 
 def sleep(seconds=1.0):
-    print("sleep(sconds={})".format(seconds))
+    global standard_output
+    message = "sleep(seconds={})".format(seconds)
+    standard_output.print(message)
     time.sleep(seconds)
 
 
 def read_distance():
     distance = distanceMeasurement(trigger, echo)
-    print("Distance: [{}] cm.".format(str(distance)))
+    print_stdout("Distance: [{}] cm.".format(str(distance)))
     return distance
 
 
@@ -146,7 +179,7 @@ def move_backwards(step=1):
 
 
 def set_motor(i=1, duty=0.5):
-    print("set_motor(i={}, duty={})".format(i, duty))
+    print_stdout("set_motor(i={}, duty={})".format(i, duty))
     if i == 1:
         motor1.set(duty)
     if i == 2:
@@ -158,7 +191,7 @@ def set_motor(i=1, duty=0.5):
 
 
 def set_servo(i=1, angle=0):
-    print("set_servo({}, {})".format(i, angle))
+    print_stdout("set_servo({}, {})".format(i, angle))
     time.sleep(0.2)
     if angle > 0 and angle > 90:
         angle = 90
@@ -183,7 +216,7 @@ def claw():
 
 def claw_open():
     global grab
-    print("release()")
+    print_stdout("release()")
     grab = True
     angle = -89.00
     time.sleep(0.2)
@@ -194,7 +227,7 @@ def claw_open():
 
 def claw_close():
     global grab
-    print("grab()")
+    print_stdout("grab()")
     grab = False
     angle = 89.0
     time.sleep(0.2)
@@ -204,6 +237,7 @@ def claw_close():
 
 
 def distanceMeasurement(TRIG,ECHO):
+    max = 1000
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)
@@ -213,8 +247,14 @@ def distanceMeasurement(TRIG,ECHO):
     while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
         counter += 1
+        if counter > max:
+            return -1
+    counter = 0
     while GPIO.input(ECHO) == 1:
         pulse_end = time.time()
+        counter += 1
+        if counter > max:
+            return -1
 
     pulse_duration = pulse_end - pulse_start
     distance = pulse_duration * 17150
@@ -223,13 +263,13 @@ def distanceMeasurement(TRIG,ECHO):
 
 
 def look_back():
-    print("look_back()")
+    print_stdout("look_back()")
     blupants_servos[1].set(-1.5)
     time.sleep(0.2)
 
 
 def look_angle(angle=90):
-    print("look_angle({})".format(angle))
+    print_stdout("look_angle({})".format(angle))
     time.sleep(0.2)
     if angle > 0 and angle > 90:
         angle = 90
@@ -242,7 +282,7 @@ def look_angle(angle=90):
 
 
 def say_yes():
-    print("say_yes()")
+    print_stdout("say_yes()")
     blupants_servos[1].set(0)
     time.sleep(0.2)
     blupants_servos[1].set(1.5)
@@ -256,7 +296,7 @@ def say_yes():
 
 
 def say_no():
-    print("say_no()")
+    print_stdout("say_no()")
     blupants_servos[1].set(0)
     time.sleep(0.2)
     blupants_servos[0].set(0)
@@ -290,7 +330,7 @@ def move_block(blocks):
 
 
 def turn_right(angle=90):
-    print("turn_right()".format(angle))
+    print_stdout("turn_right({})".format(angle))
     motor1.set(duty)
     motor2.set(duty*-1)
     motor3.set(duty*-1)
@@ -303,7 +343,7 @@ def turn_right(angle=90):
 
 
 def turn_left(angle=90):
-    print("turn_left({})".format(angle))
+    print_stdout("turn_left({})".format(angle))
     motor1.set(duty*-1)
     motor2.set(duty)
     motor3.set(duty)
@@ -316,12 +356,12 @@ def turn_left(angle=90):
 
 
 def forward(blocks=1):
-    print("forward({})".format(blocks))
+    print_stdout("forward({})".format(blocks))
     return move_block(blocks)
 
 
 def backward(blocks=1):
-    print("backward({})".format(blocks))
+    print_stdout("backward({})".format(blocks))
     return forward(-blocks)
 
 
@@ -347,6 +387,7 @@ def random_move(force=False):
 
 def shutdown():
     global running
+    print_stdout("shutdown()")
     running = False
     # stop clock
     for i in range(0, 8):

@@ -7,6 +7,7 @@ import socket
 import importlib
 import blupants.rc_balance_dstr as rc_balance_dstr
 import blupants.blupants_car as blupants_car
+import threading
 
 global studio_url
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
@@ -181,8 +182,57 @@ def run():
     print("Done!")
 
 
+def web_server():
+    from flask import Flask, Response, render_template
+
+    application = Flask(__name__)
+    #application._static_folder = os.path.abspath("templates/static/")
+
+    global buff
+    buff = []
+
+    # Test function for panel iframe
+    def get_stdout_data():
+        global buff
+
+        data = blupants_car.get_stdout()
+        if len(data) > 0:
+            return data
+
+        time.sleep(1.0)
+        if len(buff) >= 6:
+            buff = buff[1:]
+        buff.append("data:" + str(time.ctime(time.time())))
+        data = ""
+        for i in buff:
+            data += i + "\n"
+        return data + "\n"
+
+    # Endpoint to stream stdout data
+    @application.route('/stdout_stream')
+    def stdout_stream():
+        def event_stream():
+            while True:
+                data = get_stdout_data()
+                yield "{}".format(data)
+        return Response(event_stream(), mimetype="text/event-stream")
+
+    @application.route('/panel')
+    def console():
+        return render_template('console.html')
+
+    application.run(host='0.0.0.0', port="1370", threaded=True)
+
+
 def main():
-    return run()
+    thread1 = threading.Thread(target=run)
+    thread2 = threading.Thread(target=web_server)
+
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
 
 
 if __name__ == '__main__':

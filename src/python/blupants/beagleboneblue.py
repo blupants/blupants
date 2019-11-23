@@ -129,7 +129,7 @@ class BeagleBoneBlue:
         servo.disable()
 
     def sleep(self, seconds=1.0):
-        print("sleep(sconds={})".format(seconds))
+        print("sleep(seconds={})".format(seconds))
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0):
@@ -201,6 +201,7 @@ class BluPants(BeagleBoneBlue):
         GPIO.output(self.trigger, False)
 
     def _distance_measurement(self):
+        max = 1000
         GPIO.output(self.trigger, True)
         time.sleep(0.00001)
         GPIO.output(self.trigger, False)
@@ -210,8 +211,14 @@ class BluPants(BeagleBoneBlue):
         while GPIO.input(self.echo) == 0:
             pulse_start = time.time()
             counter += 1
+            if counter > max:
+                return -1
+        counter = 0
         while GPIO.input(self.echo) == 1:
             pulse_end = time.time()
+            counter += 1
+            if counter > max:
+                return -1
 
         pulse_duration = pulse_end - pulse_start
         distance = pulse_duration * 17150

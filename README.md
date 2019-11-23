@@ -59,6 +59,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cd
     # chmod +x /etc/robotcontrol/link_to_startup_program
     # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
+    # cp -r blupants/src/python/blupants/templates /usr/local/lib/python3.5/dist-packages/blupants/
     # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
     # /etc/robotcontrol/link_to_startup_program
     
