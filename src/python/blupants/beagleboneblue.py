@@ -24,8 +24,8 @@ default_config =\
                 "claw":
                     {
                         "servo": 8,
-                        "angle_open": -89.0,
-                        "angle_close": 89.0
+                        "angle_open": -45.0,
+                        "angle_close": 45.0
                     },
                 "hcsr04":
                     {
@@ -55,7 +55,7 @@ default_config =\
             },
         "EduMIP":
             {
-                "block_length": 0.28
+                "block_length": 0.28,
                 "turn_coefficient": 0.0175,
                 "meter_coefficient": 14,
                 "servo_shoulder_left": 7,
@@ -69,8 +69,26 @@ default_config =\
 }
 
 
+class StudioConsole:
+    def __init__(self):
+        self.buffer = []
+
+    def get_stdout(self):
+        data = ""
+        for message in self.buffer:
+            data += message + "\n"
+        return data + "\n"
+
+    def print(self, message):
+        print(message)
+        if len(self.buffer) >= 6:
+            self.buffer = self.buffer[1:]
+        self.buffer.append("data:" + str(message))
+
+
 class BeagleBoneBlue:
     def __init__(self, config={}, config_file=""):
+        self.standard_output = StudioConsole()
         self.running = False
         self.config = config
         self.config_file = config_file
@@ -90,9 +108,7 @@ class BeagleBoneBlue:
 
         self.motors = [motor.Motor(1), motor.Motor(2), motor.Motor(3), motor.Motor(4)]
 
-        self._boot()
-
-    def _boot(self):
+        # Boot
         GPIO.cleanup()
         rcpy.set_state(rcpy.RUNNING)
         # disable servos
@@ -120,6 +136,12 @@ class BeagleBoneBlue:
             .format(name=self.name, config_file=self.config_file, config=robot_json)
         print(message)
 
+    def get_stdout(self):
+        return self.standard_output.get_stdout()
+
+    def print_stdout(self, message):
+        self.standard_output.print(message)
+
     def shutdown(self):
         self.running = False
         # stop clock
@@ -127,13 +149,15 @@ class BeagleBoneBlue:
             self.clcks[i].stop()
         # disable servos
         servo.disable()
+        rcpy.set_state(rcpy.EXITING)
+        GPIO.cleanup()
 
     def sleep(self, seconds=1.0):
-        print("sleep(seconds={})".format(seconds))
+        self.print_stdout("sleep(seconds={})".format(seconds))
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0):
-        print("set_servo(i={}, angle={})".format(i, angle))
+        self.print_stdout("set_servo(i={}, angle={})".format(i, angle))
         time.sleep(0.2)
         if angle > 0 and angle > 90:
             angle = 90
@@ -144,7 +168,7 @@ class BeagleBoneBlue:
         time.sleep(0.2)
 
     def set_motor(self, i=1, duty=0.5):
-        print("set_motor(i={}, duty={})".format(i, duty))
+        self.print_stdout("set_motor(i={}, duty={})".format(i, duty))
         self.motors[i - 1].set(duty)
 
 
@@ -165,10 +189,15 @@ class BluPants(BeagleBoneBlue):
         self.servo_claw_angle_open = -80.
         self.servo_claw_angle_close = 80.0
         super().__init__(config, config_file)
-        self._load_config()
-        self._boot()
+
+        # Boot
+        # Configuration
+        GPIO.setup(self.trigger , GPIO.OUT)  # Trigger
+        GPIO.setup(self.echo, GPIO.IN)  # Echo
+        GPIO.output(self.trigger, False)
 
     def _load_config(self):
+        super()._load_config()
         if "blupants" in self.config:
             if "motor" in self.config["blupants"]:
                 if "duty_ratio" in self.config["blupants"]["motor"]:
@@ -194,14 +223,8 @@ class BluPants(BeagleBoneBlue):
                 if "angle_close" in self.config["blupants"]["claw"]:
                     self.servo_claw_angle_close = self.config["blupants"]["claw"]["angle_close"]
 
-    def _boot(self):
-        # Configuration
-        GPIO.setup(self.trigger , GPIO.OUT)  # Trigger
-        GPIO.setup(self.echo, GPIO.IN)  # Echo
-        GPIO.output(self.trigger, False)
-
     def _distance_measurement(self):
-        max = 1000
+        max = 10000
         GPIO.output(self.trigger, True)
         time.sleep(0.00001)
         GPIO.output(self.trigger, False)
@@ -235,25 +258,25 @@ class BluPants(BeagleBoneBlue):
         return self.claw_toggle()
 
     def claw_open(self):
-        print("claw_open()")
+        self.print_stdout("claw_open()")
         self.grab = True
         self.set_servo(self.servo_claw, self.servo_claw_angle_open)
 
     def claw_close(self):
-        print("claw_close()")
+        self.print_stdout("claw_close()")
         self.grab = False
         self.set_servo(self.servo_claw, self.servo_claw_angle_close)
 
     def read_distance(self):
         distance = 0
         # Read sonar
-        self._distance_measurement()
+        distance = self._distance_measurement()
         system = self.config.get("measurement_system").lower()
         if system == "r" or system == "i" or system == "b":
             distance = distance * 0.393701
-            print("Distance: [{}] inches.".format(str(distance)))
+            self.print_stdout("Distance: [{}] inches.".format(str(distance)))
         else:
-            print("Distance: [{}] cm.".format(str(distance)))
+            self.print_stdout("Distance: [{}] cm.".format(str(distance)))
         return distance
 
     def move(self, period=1, duty=1):
@@ -266,17 +289,17 @@ class BluPants(BeagleBoneBlue):
             self.set_motor(i, 0)
 
     def move_forward(self, blocks=1, speed=0.5):
-        print("move_forward(blocks={}, speed={})".format(blocks, speed))
+        self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed))
         period = blocks/speed
         self.move(period, speed)
 
     def move_backwards(self, blocks=1, speed=0.5):
-        print("move_backwards(blocks={}, speed={})".format(blocks, speed))
+        self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed))
         period = blocks/speed
         self.move(period, speed*-1)
 
     def turn_right(self, angle=90):
-        print("turn_right(angle={})".format(angle))
+        self.print_stdout("turn_right(angle={})".format(angle))
 
         duty = 0.3  # Use fixed duty cycle for turning
 
@@ -295,7 +318,7 @@ class BluPants(BeagleBoneBlue):
         self.set_motor(self.motor_back_right, 0)
 
     def turn_left(self, angle=90):
-        print("turn_left(angle={})".format(angle))
+        self.print_stdout("turn_left(angle={})".format(angle))
 
         duty = 0.3  # Use fixed duty cycle for turning
 
@@ -333,7 +356,7 @@ class BluPantsCar(BluPants):
                     self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
 
     def camera_toggle(self):
-        print("camera_toggle()")
+        self.print_stdout("camera_toggle()")
         max = len(self.camera_toggle_positions)
         if self.camera_pos >= max:
             self.camera_pos = 0
@@ -346,7 +369,7 @@ class BluPantsCar(BluPants):
         self.camera_pos += 1
 
     def look_angle(self, angle=90):
-        print("look_angle(angle={})".format(angle))
+        self.print_stdout("look_angle(angle={})".format(angle))
         self.sleep(0.2)
         if angle > 0 and angle > 90:
             angle = 90
@@ -358,7 +381,7 @@ class BluPantsCar(BluPants):
         self.sleep(0.2)
 
     def say_yes(self):
-        print("say_yes()")
+        self.print_stdout("say_yes()")
         self.look_angle(0)
         self.set_servo(self.servo_vertical, 1.4)
         self.sleep(0.2)
@@ -369,7 +392,7 @@ class BluPantsCar(BluPants):
         self.look_angle(0)
 
     def say_no(self):
-        print("say_no()")
+        self.print_stdout("say_no()")
         self.look_angle(0)
         self.sleep(0.4)
         self.set_servo(self.servo_horizontal, 1.4)
@@ -426,41 +449,41 @@ class EduMIP(BluPants):
         self.sleep(2)
 
     def move_forward(self, blocks=1):
-        print("move_forward(blocks={})".format(blocks))
+        self.print_stdout("move_forward(blocks={})".format(blocks))
         self.move(self.block_length*blocks)
 
     def move_backwards(self, blocks=1):
-        print("move_backwards(blocks={})".format(blocks))
+        self.print_stdout("move_backwards(blocks={})".format(blocks))
         self.move(self.block_length*blocks*-1)
 
     def turn_left(self, angle=90.0):
-        print("turn_left(angle={})".format(angle))
+        self.print_stdout("turn_left(angle={})".format(angle))
         self._create_cmd_file("left.txt.")
         self.sleep(self.turn_coefficient * angle)
         self._create_cmd_file("break.txt.")
         self.sleep(2)
 
     def turn_right(self, angle=90.0):
-        print("turn_right(angle={})".format(angle))
+        self.print_stdout("turn_right(angle={})".format(angle))
         self._create_cmd_file("right.txt.")
         self.sleep(self.turn_coefficient * angle)
         self._create_cmd_file("break.txt.")
         self.sleep(2)
 
     def claw_open(self):
-        print("claw_open()")
+        self.print_stdout("claw_open()")
         self.grab = True
         self.set_servo(self.servo_shoulder_left, self.servo_claw_angle_open * -1)
         self.set_servo(self.servo_shoulder_right, self.servo_claw_angle_open)
 
     def claw_close(self):
-        print("claw_close()")
+        self.print_stdout("claw_close()")
         self.grab = False
         self.set_servo(self.servo_shoulder_left, self.servo_claw_angle_close)
         self.set_servo(self.servo_shoulder_right, self.servo_claw_angle_close * -1)
 
     def say_no(self):
-        print("say_no()")
+        self.print_stdout("say_no()")
         self.set_servo(self.servo_shoulder_left, 0)
         self.set_servo(self.servo_shoulder_right, 0)
         self.sleep(0.2)
@@ -474,7 +497,7 @@ class EduMIP(BluPants):
         self.set_servo(self.servo_shoulder_left, 0)
 
     def say_yes(self):
-        print("say_yes()")
+        self.print_stdout("say_yes()")
         self.set_servo(self.servo_shoulder_left, 0)
         self.set_servo(self.servo_shoulder_right, 0)
         self.sleep(0.2)

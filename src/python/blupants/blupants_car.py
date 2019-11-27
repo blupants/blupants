@@ -237,7 +237,7 @@ def claw_close():
 
 
 def distanceMeasurement(TRIG,ECHO):
-    max = 1000
+    max = 10000
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)
