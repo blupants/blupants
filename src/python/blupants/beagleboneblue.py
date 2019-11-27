@@ -11,84 +11,19 @@ import rcpy.gpio as gpio
 from rcpy.gpio import InputEvent
 import Adafruit_BBIO.GPIO as GPIO
 
+try:
+    import robots_common
+except:
+    import blupants.robots_common as robots_common
+
 
 global default_config
-default_config =\
-    {
-        "name": "BluPants",
-        "measurement_system": "m",
-        "step_distance": 0.3,
-        "period": 0.02,
-        "blupants":
-            {
-                "claw":
-                    {
-                        "servo": 8,
-                        "angle_open": -45.0,
-                        "angle_close": 45.0
-                    },
-                "hcsr04":
-                    {
-                        "echo": "P9_23",
-                        "trigger": "GPIO1_25",
-                        "vcc": "GP0_3v3",
-                        "gnd": "GP0_GND"
-                    },
-                "motor":
-                    {
-                        "position":
-                            {
-                                "front_left": 1,
-                                "front_right": 2,
-                                "back_left": 3,
-                                "back_right": 4
-                            },
-                        "duty_ratio": [1.0, 1.0, 1.0, 1.0],
-                        "turn_right_period": 0.0053,
-                        "turn_left_period": 0.0052
-                    },
-                "camera":
-                    {
-                        "servo_horizontal": 1,
-                        "servo_vertical": 2
-                    }
-            },
-        "EduMIP":
-            {
-                "block_length": 0.28,
-                "turn_coefficient": 0.0175,
-                "meter_coefficient": 14,
-                "servo_shoulder_left": 7,
-                "servo_shoulder_right": 6,
-                "claw":
-                    {
-                        "angle_open": 45.0,
-                        "angle_close": 30.0
-                    },
-            }
-}
+default_config = robots_common.default_config
 
 
-class StudioConsole:
-    def __init__(self):
-        self.buffer = []
-
-    def get_stdout(self):
-        data = ""
-        for message in self.buffer:
-            data += message + "\n"
-        return data + "\n"
-
-    def print(self, message):
-        print(message)
-        if len(self.buffer) >= 6:
-            self.buffer = self.buffer[1:]
-        self.buffer.append("data:" + str(message))
-
-
-class BeagleBoneBlue:
+class BeagleBoneBlue(robots_common.RobotHollow):
     def __init__(self, config={}, config_file=""):
-        self.standard_output = StudioConsole()
+        self.standard_output = robots_common.StudioConsole()
         self.running = False
         self.config = config
         self.config_file = config_file
