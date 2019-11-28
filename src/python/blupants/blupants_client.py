@@ -4,10 +4,12 @@ import time
 import json
 import requests
 import socket
-import importlib
-import blupants.rc_balance_dstr as rc_balance_dstr
-import blupants.blupants_car as blupants_car
 import threading
+
+try:
+    import robots_common
+except:
+    import blupants.robots_common as robots_common
 
 global studio_url
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
@@ -20,9 +22,8 @@ global robot_id
 robot_id = 0  # mr_blupants / eduMIP
 robot_id = 1  # blupants_car
 
-global step
-step = 1
-
+global robot_name
+robot_name = "blupants_car"
 
 global dynamic_code_file
 dynamic_code_file = "/usr/local/lib/python3.5/dist-packages/blupants/blupants_rpc.py"
@@ -41,43 +42,69 @@ if os.path.isfile(config_file):
 
 if "robot_id" in config:
     robot_id = config["robot_id"]
+    if robot_id == 0:
+        robot_name = "blupants_car"
+    if robot_id == 1:
+        robot_name = "edumip"
+    if robot_id == 2:
+        robot_name = "vex"
+    if robot_id == 3:
+        robot_name = "ev3"
 
 # TODO refactor this module to be an flask-restful API, so it passivley listen for new code to be executed
 # It will allow the BluPants Studio to send code to it directly to the robots via LAN, rather than this module having
 # to actively send GET requests for new code
 
 
+def _create_rpc_content(code=""):
+    rpc_code = _create_rpc_file_header()
+    rpc_code += code
+    rpc_code += "\n\nshutdown(quiet=True)"
+    return rpc_code
+
+
+def _create_rpc_file_header():
+    header_import = "\
+try:\n\
+  import robots\n\
+except:\n\
+  import blupants.robots as robots\n\
+"
+    object_definition = "robot = robots.Robot(\"{}\")\n".format(robot_name)
+    functions = ""
+    try:
+        for func in dir(robots_common.RobotHollow):
+            line = "{} = robot.{}\n".format(func, func)
+            if not line.startswith("_"):
+                functions += line
+    except:
+        for func in dir(blupants.robots_common.RobotHollow):
+            line = "{} = robot.{}\n".format(func, func)
+            if not line.startswith("_"):
+                functions += line
+    dyn_code = header_import + object_definition + functions
+    return dyn_code
+
+
 def _reset_rpc_module():
     global dynamic_code_file
     cmd = "echo \"print(\\\"RPC module resetting...\\\")\" > {}".format(dynamic_code_file)
-    print(cmd)
     os.system(cmd)
     time.sleep(1)
-    import blupants.blupants_rpc
-    time.sleep(1)
-    dynamic_code_file = os.path.abspath(blupants.blupants_rpc.__file__)
-    print(dynamic_code_file)
 
 
-def _reload_rpc_module(code="print(\"RPC module\")"):
+def _exec_rpc_code(code=""):
     global dynamic_code_file
-    try:
-        _reset_rpc_module()
-        import blupants.blupants_rpc
-        with open(dynamic_code_file, "w") as f:
-            f.write(code)
-        time.sleep(1)
-        module = blupants.blupants_rpc.__name__
-        print("Reloading module [{}] from [{}].\nExecuting code: \n\n{}\n\n".format(module, dynamic_code_file, code))
-        importlib.reload(sys.modules[module])
-    except Exception as ex:
-        print(ex)
-        _reset_rpc_module()
+    python_code = _create_rpc_content(code)
+    with open(dynamic_code_file, "w") as f:
+        f.write(python_code)
+    time.sleep(1)
+    os.system("python3 {}".format(dynamic_code_file))
+    return
 
 
 def execute_python_code(py, version=1):
     global dynamic_code_file
-    global step
     itemlist = str(py).split("\n")
     for s in itemlist:
         cmd = str(s)
@@ -94,11 +121,7 @@ def execute_python_code(py, version=1):
             return
 
     if version >= 1:
-        dyn_code = "from blupants.blupants_car import *\n"
-        if robot_id == 0:
-            dyn_code = "from blupants.rc_balance_dstr import *\n"
-        dyn_code = dyn_code + py
-        _reload_rpc_module(dyn_code)
+        _exec_rpc_code(py)
         return
 
 
@@ -139,14 +162,6 @@ def get_code():
 def shutdown():
     global running
     running = False
-    dyn_code = "from blupants.blupants_car import *\n"
-    if robot_id == 0:
-        dyn_code = "from blupants.rc_balance_dstr import *\n"
-        rc_balance_dstr.shutdown()
-    if robot_id == 1:
-        blupants_car.shutdown()
-    dyn_code = dyn_code + "shutdown()"
-    _reload_rpc_module(dyn_code)
     _reset_rpc_module()
 
 
@@ -155,11 +170,12 @@ def run():
     global running
     running = True
 
-    if robot_id == 1:
-        blupants_car.claw_toggle()
-        blupants_car.say_yes()
-        blupants_car.claw_toggle()
+    dyn_code = "claw_toggle()\n"
+    dyn_code += "say_yes()\n"
+    dyn_code += "claw_toggle()\n"
+    _exec_rpc_code(dyn_code)
     _reset_rpc_module()
+
     while running:
         print("Executing ...")
         code = get_code()
@@ -188,32 +204,13 @@ def web_server():
     application = Flask(__name__)
     #application._static_folder = os.path.abspath("templates/static/")
 
-    global buff
-    buff = []
-
-    # Test function for panel iframe
-    def get_stdout_data():
-        global buff
-
-        data = blupants_car.get_stdout()
-        if len(data) > 0:
-            return data
-
-        time.sleep(1.0)
-        if len(buff) >= 6:
-            buff = buff[1:]
-        buff.append("data:" + str(time.ctime(time.time())))
-        data = ""
-        for i in buff:
-            data += i + "\n"
-        return data + "\n"
-
     # Endpoint to stream stdout data
     @application.route('/stdout_stream')
     def stdout_stream():
         def event_stream():
             while True:
-                data = get_stdout_data()
+                time.sleep(1.0)
+                data = robots_common.get_stdout()
                 yield "{}".format(data)
         return Response(event_stream(), mimetype="text/event-stream")
 
