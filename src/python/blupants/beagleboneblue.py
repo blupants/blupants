@@ -23,7 +23,7 @@ default_config = robots_common.default_config
 
 class BeagleBoneBlue(robots_common.RobotHollow):
     def __init__(self, config={}, config_file=""):
-        self.standard_output = robots_common.StudioConsole()
+        super().__init__()
         self.running = False
         self.config = config
         self.config_file = config_file
@@ -62,21 +62,6 @@ class BeagleBoneBlue(robots_common.RobotHollow):
                 self.config[key] = default_config[key]
         if "name" in self.config:
             self.name = self.config.get("name")
-
-    def to_string(self):
-        header = "BeagleBoneBlue".format()
-        print(header)
-        robot_json = json.dumps(self.config, sort_keys=True, indent=2, separators=(',', ': '))
-        message = "My name is: [{name}].\nconfig_file: [{config_file}]\nconfig:\n{config}"\
-            .format(name=self.name, config_file=self.config_file, config=robot_json)
-        print(message)
-
-    def get_stdout(self):
-        return self.standard_output.get_stdout()
-
-    def print_stdout(self, message, quiet=False):
-        if not quiet:
-            self.standard_output.print(message)
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -123,7 +108,7 @@ class BluPants(BeagleBoneBlue):
         self.echo = "P9_23"
         self.trigger = "GPIO1_25"
         self.servo_claw = 8
-        self.servo_claw_angle_open = -80.
+        self.servo_claw_angle_open = -80.0
         self.servo_claw_angle_close = 80.0
         super().__init__(config, config_file)
 
@@ -219,10 +204,10 @@ class BluPants(BeagleBoneBlue):
     def move(self, period=1, duty=1, quiet=False):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
         self.duty = duty
-        for i in range(0, 4):
+        for i in range(1, 5):
             self.set_motor(i, duty * self.duty_ratio[i], quiet=True)
         self.sleep(period, quiet=True)
-        for i in range(0, 4):
+        for i in range(1, 5):
             self.set_motor(i, 0, quiet=True)
 
     def move_forward(self, blocks=1, speed=0.5, quiet=False):

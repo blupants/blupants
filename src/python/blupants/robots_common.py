@@ -116,78 +116,108 @@ def get_stdout():
     return std_out.get_stdout()
 
 
-def _warning():
-    print("RobotHollow: Method not implemented!")
-
-
 class RobotHollow:
-    def __init__(self, platform):
-        self._robot = None
+    def __init__(self):
+        self.standard_output = StudioConsole()
+
+    def get_stdout(self):
+        return self.standard_output.get_stdout()
+
+    def print_stdout(self, message, quiet=False):
+        if not quiet:
+            self.standard_output.print(message)
+
+    def print(self, message, quiet=False):
+        self.say(message, quiet)
+
+    def say_yes(self, quiet=False):
+        self.say("yes", quiet)
+
+    def say_no(self, quiet=False):
+        self.say("no", quiet)
+
+    def say_welcome(self, quiet=False):
+        self.say_yes(quiet)
+
+    def say(self, message, quiet=False):
+        self.print_stdout(message, quiet)
+        pass
+
+    def _warning(self):
+        self.print_stdout("RobotHollow: Method not implemented!")
 
     def claw_toggle(self):
-        _warning()
+        self._warning()
         pass
 
     def claw_open(self):
-        _warning()
+        self._warning()
         pass
 
     def claw_close(self):
-        _warning()
+        self._warning()
         pass
 
     def read_distance(self):
-        _warning()
+        self._warning()
         return -10
 
     def move_forward(self, blocks=1, speed=0.5):
-        _warning()
+        self._warning()
         pass
 
     def move_backwards(self, blocks=1, speed=0.5):
-        _warning()
+        self._warning()
         pass
 
     def turn_right(self, angle=90):
-        _warning()
+        self._warning()
         pass
 
     def turn_left(self, angle=90):
-        _warning()
+        self._warning()
         pass
 
     def sleep(self, seconds=1.0):
-        _warning()
+        self._warning()
         pass
 
     def shutdown(self):
-        _warning()
+        self._warning()
         pass
 
     def set_servo(self, i=1, angle=0.0):
-        _warning()
+        self._warning()
         pass
 
     def set_motor(self, i=1, duty=0.5):
-        _warning()
+        self._warning()
         pass
 
     def move(self, period=1, duty=1):
-        _warning()
+        self._warning()
         pass
 
     def camera_toggle(self):
-        _warning()
+        self._warning()
         pass
 
     def look_angle(self, angle=90):
-        _warning()
+        self._warning()
         pass
 
     def say_yes(self):
-        _warning()
+        self._warning()
         pass
 
     def say_no(self):
-        _warning()
+        self._warning()
+        pass
+
+    def say_welcome(self, quiet=False):
+        self._warning()
+        pass
+
+    def say(self, message, quiet=False):
+        self._warning()
         pass

@@ -171,7 +171,7 @@ def run():
     running = True
 
     dyn_code = "claw_toggle()\n"
-    dyn_code += "say_yes()\n"
+    dyn_code += "say_welcome()\n"
     dyn_code += "claw_toggle()\n"
     _exec_rpc_code(dyn_code)
     _reset_rpc_module()

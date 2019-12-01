@@ -15,13 +15,16 @@ class RobotFactory:
     def get_robot(self, platform):
         creator = self._creators.get(platform)
         if not creator:
-            return robots_common.RobotHollow("")
+            return robots_common.RobotHollow()
         return creator()
 
 
 class Robot(robots_common.RobotHollow):
     def __init__(self, platform):
         self._robot = factory.get_robot(platform)
+
+    def print(self, message):
+        return self._robot.print(message)
 
     def claw_toggle(self):
         return self._robot.claw_toggle()
@@ -50,8 +53,8 @@ class Robot(robots_common.RobotHollow):
     def sleep(self, seconds=1.0):
         return self._robot.sleep(seconds)
 
-    def shutdown(self, quiet=False):
-        return self._robot.shutdown(quiet)
+    def shutdown(self):
+        return self._robot.shutdown()
 
     def set_servo(self, i=1, angle=0.0):
         return self._robot.set_servo(i, angle)
@@ -73,6 +76,12 @@ class Robot(robots_common.RobotHollow):
 
     def say_no(self):
         return self._robot.say_no()
+
+    def say_welcome(self):
+        return self._robot.say_welcome()
+
+    def say(self, message):
+        return self._robot.say(message)
 
 
 global factory
@@ -102,7 +111,7 @@ try:
     import ev3
 except:
     try:
-        import blupants.ev3
+        import blupants.ev3 as ev3
     except:
         pass
 try:
@@ -110,6 +119,7 @@ try:
 except:
     pass
 try:
-    factory.register_robot("smart_brick", ev3.smart_brick)
+    factory.register_robot("gripp3r", ev3.Gripp3r)
+    factory.register_robot("gripper", ev3.Gripp3r)
 except:
     pass
