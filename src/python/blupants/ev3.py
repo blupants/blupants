@@ -28,22 +28,18 @@ class EV3(robots_common.RobotHollow):
         self.motors = []
         try:
             self.motors.append(motor.LargeMotor(motor.OUTPUT_A))
-            self._motor_counter += 1
         except:
             pass
         try:
             self.motors.append(motor.LargeMotor(motor.OUTPUT_B))
-            self._motor_counter += 1
         except:
             pass
         try:
             self.motors.append(motor.LargeMotor(motor.OUTPUT_C))
-            self._motor_counter += 1
         except:
             pass
         try:
             self.motors.append(motor.LargeMotor(motor.OUTPUT_D))
-            self._motor_counter += 1
         except:
             pass
 
@@ -95,11 +91,12 @@ class EV3(robots_common.RobotHollow):
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
-        self.say("Goodbye!")
+        self.say("Goodbye!", quiet)
         self.running = False
 
     def sleep(self, seconds=1.0, quiet=False):
         self.print_stdout("sleep(seconds={})".format(seconds), quiet)
+        self.say("Sleeping for {} seconds.".format(seconds), quiet)
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0.0, quiet=False):
@@ -147,20 +144,21 @@ class EV3(robots_common.RobotHollow):
         distance = -1
         if self.infrared_sensor:
             distance = self.infrared_sensor.proximity
-        self.print_stdout("Distance: [{}] cm.".format(str(distance)), quiet)
+        self.say("Distance is {} centimeters.".format(int(distance)), quiet)
         return distance
 
     def say(self, message, quiet=False):
         self.print_stdout(message, quiet)
-        self.sound.speak(message)
+        if not quiet:
+            self.sound.speak(message)
 
 
 class Gripp3r(EV3):
     def __init__(self, config={}, config_file=""):
         self.duty = 0.5
         self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
-        self.turn_right_period = 0.005
-        self.turn_left_period = 0.005
+        self.turn_right_period = 0.015
+        self.turn_left_period = 0.015
         self.motor_front_left = 0
         self.motor_front_right = 1
         self.motor_back_left = 2
@@ -210,11 +208,13 @@ class Gripp3r(EV3):
 
     def claw_open(self, quiet=False):
         self.print_stdout("claw_open()", quiet)
+        self.say("Opening claw.", quiet)
         self.grab = True
         self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
 
     def claw_close(self, quiet=False):
         self.print_stdout("claw_close()", quiet)
+        self.say("Closing claw.", quiet)
         self.grab = False
         self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
 
@@ -237,88 +237,152 @@ class Gripp3r(EV3):
 
     def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
+        self.say("Moving {} blocks forward.".format(blocks), quiet)
         period = blocks/speed
         self.move(period, speed, quiet=True)
 
     def move_backwards(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
+        self.say("Moving {} blocks backwards.".format(blocks), quiet)
         period = blocks/speed
         self.move(period, speed*-1, quiet=True)
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
+        self.say("Turning right {} degrees.".format(angle), quiet)
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000
         time_sp = angle * self.turn_right_period * 1000
 
-        # Left
-        try:
-            self.motors[self.motor_front_left].run_timed(time_sp=time_sp, speed_sp=speed_sp*-1)
-            self.motors[self.motor_front_left].wait_until_not_moving()
-        except:
-            pass
-        try:
-            self.motors[self.motor_back_left].run_timed(time_sp=time_sp, speed_sp=speed_sp*-1)
-            self.motors[self.motor_back_left].wait_until_not_moving()
-        except:
-            pass
-
-        # Right
-        try:
-            self.motors[self.motor_front_right].run_timed(time_sp=time_sp, speed_sp=speed_sp)
-            self.motors[self.motor_front_right].wait_until_not_moving()
-        except:
-            pass
-        try:
-            self.motors[self.motor_back_right].run_timed(time_sp=time_sp, speed_sp=speed_sp)
-            self.motors[self.motor_back_right].wait_until_not_moving()
-        except:
-            pass
-
-    def turn_left(self, angle=90, quiet=False):
-        self.print_stdout("turn_left(angle={})".format(angle), quiet)
-
-        duty = 0.3  # Use fixed duty cycle for turning
-        speed_sp = duty * 1000
-        time_sp = angle * self.turn_right_period * 1000
+        motor_front_left_running = False
+        motor_back_left_running = False
+        motor_front_right_running = False
+        motor_back_right_running = False
 
         # Left
         try:
             self.motors[self.motor_front_left].run_timed(time_sp=time_sp, speed_sp=speed_sp)
-            self.motors[self.motor_front_left].wait_until_not_moving()
+            motor_front_left_running = True
         except:
             pass
         try:
             self.motors[self.motor_back_left].run_timed(time_sp=time_sp, speed_sp=speed_sp)
-            self.motors[self.motor_back_left].wait_until_not_moving()
+            motor_back_left_running = True
         except:
             pass
 
         # Right
         try:
             self.motors[self.motor_front_right].run_timed(time_sp=time_sp, speed_sp=speed_sp * -1)
-            self.motors[self.motor_front_right].wait_until_not_moving()
+            motor_front_right_running = True
         except:
             pass
         try:
             self.motors[self.motor_back_right].run_timed(time_sp=time_sp, speed_sp=speed_sp * -1)
-            self.motors[self.motor_back_right].wait_until_not_moving()
+            motor_back_right_running = True
+        except:
+            pass
+
+
+        # Left
+        try:
+            if motor_front_left_running:
+                self.motors[self.motor_front_left].wait_until_not_moving()
+        except:
+            pass
+        try:
+            if motor_back_left_running:
+                self.motors[self.motor_back_left].wait_until_not_moving()
+        except:
+            pass
+
+        # Right
+        try:
+            if motor_front_right_running:
+                self.motors[self.motor_front_right].wait_until_not_moving()
+        except:
+            pass
+        try:
+            if motor_back_right_running:
+                self.motors[self.motor_back_right].wait_until_not_moving()
+        except:
+            pass
+
+    def turn_left(self, angle=90, quiet=False):
+        self.print_stdout("turn_left(angle={})".format(angle), quiet)
+        self.say("Turning left {} degrees.".format(angle), quiet)
+
+        duty = 0.3  # Use fixed duty cycle for turning
+        speed_sp = duty * 1000
+        time_sp = angle * self.turn_right_period * 1000
+
+        motor_front_left_running = False
+        motor_back_left_running = False
+        motor_front_right_running = False
+        motor_back_right_running = False
+
+        # Left
+        try:
+            self.motors[self.motor_front_left].run_timed(time_sp=time_sp, speed_sp=speed_sp * -1)
+            motor_front_left_running = True
+        except:
+            pass
+        try:
+            self.motors[self.motor_back_left].run_timed(time_sp=time_sp, speed_sp=speed_sp * -1)
+            motor_back_left_running = True
+        except:
+            pass
+
+        # Right
+        try:
+            self.motors[self.motor_front_right].run_timed(time_sp=time_sp, speed_sp=speed_sp)
+            motor_front_right_running = True
+        except:
+            pass
+        try:
+            self.motors[self.motor_back_right].run_timed(time_sp=time_sp, speed_sp=speed_sp)
+            motor_back_right_running = True
+        except:
+            pass
+
+        # Left
+        try:
+            if motor_front_left_running:
+                self.motors[self.motor_front_left].wait_until_not_moving()
+        except:
+            pass
+        try:
+            if motor_back_left_running:
+                self.motors[self.motor_back_left].wait_until_not_moving()
+        except:
+            pass
+
+        # Right
+        try:
+            if motor_front_right_running:
+                self.motors[self.motor_front_right].wait_until_not_moving()
+        except:
+            pass
+        try:
+            if motor_back_right_running:
+                self.motors[self.motor_back_right].wait_until_not_moving()
         except:
             pass
 
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
-        self.say("Yes!")
+        self.say("Yes!", quiet)
 
     def say_no(self, quiet=False):
         self.print_stdout("say_no()", quiet)
-        self.say('No!')
+        self.say("No!", quiet)
 
     def say_welcome(self, quiet=False):
         self.print_stdout("say_welcome()", quiet)
-        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning computer science with me?".format(self.name)
-        self.say(message)
+        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning computer science with me?"\
+            .format(self.name)
+        self.say(message, quiet)
 
 def test():
     robot = Gripp3r()

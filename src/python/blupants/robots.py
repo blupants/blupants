@@ -53,8 +53,8 @@ class Robot(robots_common.RobotHollow):
     def sleep(self, seconds=1.0):
         return self._robot.sleep(seconds)
 
-    def shutdown(self):
-        return self._robot.shutdown()
+    def shutdown(self, quiet=False):
+        return self._robot.shutdown(quiet)
 
     def set_servo(self, i=1, angle=0.0):
         return self._robot.set_servo(i, angle)

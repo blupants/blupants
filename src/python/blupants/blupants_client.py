@@ -19,11 +19,12 @@ global local_ip
 local_ip = "127.0.0.1"
 
 global robot_id
-robot_id = 0  # mr_blupants / eduMIP
-robot_id = 1  # blupants_car
+robot_id = 0  # blupants_car
+# robot_id = 1  # mr_blupants / eduMIP
+# robot_id = 2  # gripper
 
 global robot_name
-robot_name = "blupants_car"
+robot_name = ""
 
 global dynamic_code_file
 dynamic_code_file = "/usr/local/lib/python3.5/dist-packages/blupants/blupants_rpc.py"
@@ -42,14 +43,15 @@ if os.path.isfile(config_file):
 
 if "robot_id" in config:
     robot_id = config["robot_id"]
-    if robot_id == 0:
-        robot_name = "blupants_car"
-    if robot_id == 1:
-        robot_name = "edumip"
-    if robot_id == 2:
-        robot_name = "vex"
-    if robot_id == 3:
-        robot_name = "ev3"
+
+if robot_id == 0:
+    robot_name = "blupants_car"
+if robot_id == 1:
+    robot_name = "edumip"
+if robot_id == 2:
+    robot_name = "gripper"
+if robot_id == 3:
+    robot_name = "ev3"
 
 # TODO refactor this module to be an flask-restful API, so it passivley listen for new code to be executed
 # It will allow the BluPants Studio to send code to it directly to the robots via LAN, rather than this module having
@@ -64,6 +66,7 @@ def _create_rpc_content(code=""):
 
 
 def _create_rpc_file_header():
+    print("Executing code for robot: [{}]".format(robot_name))
     header_import = "\
 try:\n\
   import robots\n\
@@ -113,8 +116,6 @@ def execute_python_code(py, version=1):
 
         # TODO: Refactoring - implement an interface and remove all those if robot_id == x statements
         if s == "shutdown()":
-            os.system("/usr/bin/rc_test_leds")
-            time.sleep(5)
             shutdown()
             time.sleep(5)
             os.system("poweroff")

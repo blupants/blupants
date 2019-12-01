@@ -182,7 +182,7 @@ class RobotHollow:
         self._warning()
         pass
 
-    def shutdown(self):
+    def shutdown(self, quiet=False):
         self._warning()
         pass
 
