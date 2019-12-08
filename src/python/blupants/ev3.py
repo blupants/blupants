@@ -164,7 +164,7 @@ class Gripp3r(EV3):
         self.motor_back_left = 2
         self.motor_back_right = 3
         self.grab = True
-        self.servo_claw = "d"
+        self.servo_claw = "a"
         self.servo_claw_angle_open = -560
         self.servo_claw_angle_close = 560
         super().__init__(config, config_file)
@@ -237,13 +237,19 @@ class Gripp3r(EV3):
 
     def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
-        self.say("Moving {} blocks forward.".format(blocks), quiet)
+        block_message = "blocks"
+        if blocks > -2 and blocks < 2:
+            block_message = "block"
+        self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
         period = blocks/speed
         self.move(period, speed, quiet=True)
 
     def move_backwards(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
-        self.say("Moving {} blocks backwards.".format(blocks), quiet)
+        block_message = "blocks"
+        if blocks > -2 and blocks < 2:
+            block_message = "block"
+        self.say("Moving {} {} backwards.".format(blocks, block_message), quiet)
         period = blocks/speed
         self.move(period, speed*-1, quiet=True)
 
