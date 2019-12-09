@@ -390,21 +390,3 @@ class Gripp3r(EV3):
             .format(self.name)
         self.say(message, quiet)
 
-def test():
-    robot = Gripp3r()
-    a = robot.read_distance()
-    print(a)
-
-    robot.claw_toggle()
-    robot.say_welcome()
-    robot.claw_toggle()
-    robot.move_forward()
-    robot.move_backwards()
-    robot.turn_left()
-    robot.turn_right()
-    robot.say_yes()
-    robot.say_no()
-    robot.shutdown()
-
-
-#test()

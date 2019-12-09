@@ -11,6 +11,12 @@ try:
 except:
     import blupants.robots_common as robots_common
 
+try:
+    import robots
+except:
+    import blupants.robots as robots
+
+
 global studio_url
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
 studio_url = "http://blupants.org"
@@ -25,9 +31,6 @@ robot_id = 0  # blupants_car
 
 global robot_name
 robot_name = ""
-
-global dynamic_code_file
-dynamic_code_file = "/usr/local/lib/python3.5/dist-packages/blupants/blupants_rpc.py"
 
 
 global config_file
@@ -67,12 +70,7 @@ def _create_rpc_content(code=""):
 
 def _create_rpc_file_header():
     print("Executing code for robot: [{}]".format(robot_name))
-    header_import = "\
-try:\n\
-  import robots\n\
-except:\n\
-  import blupants.robots as robots\n\
-"
+    header_import = ""
     object_definition = "robot = robots.Robot(\"{}\")\n".format(robot_name)
     functions = ""
     try:
@@ -85,29 +83,21 @@ except:\n\
             line = "{} = robot.{}\n".format(func, func)
             if not line.startswith("_"):
                 functions += line
-    dyn_code = header_import + object_definition + functions
+    dyn_code = header_import + object_definition + "\n\n" + functions
     return dyn_code
 
 
 def _reset_rpc_module():
-    global dynamic_code_file
-    cmd = "echo \"print(\\\"RPC module resetting...\\\")\" > {}".format(dynamic_code_file)
-    os.system(cmd)
-    time.sleep(1)
+    pass
 
 
 def _exec_rpc_code(code=""):
-    global dynamic_code_file
     python_code = _create_rpc_content(code)
-    with open(dynamic_code_file, "w") as f:
-        f.write(python_code)
-    time.sleep(1)
-    os.system("python3 {}".format(dynamic_code_file))
+    exec(python_code)
     return
 
 
 def execute_python_code(py, version=1):
-    global dynamic_code_file
     itemlist = str(py).split("\n")
     for s in itemlist:
         cmd = str(s)

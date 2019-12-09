@@ -33,8 +33,8 @@ default_config =\
                                 "back_right": 4
                             },
                         "duty_ratio": [1.0, 1.0, 1.0, 1.0],
-                        "turn_right_period": 0.0053,
-                        "turn_left_period": 0.0052
+                        "turn_right_period": 0.005,
+                        "turn_left_period": 0.005
                     },
                 "camera":
                     {

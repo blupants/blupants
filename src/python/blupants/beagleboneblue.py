@@ -109,8 +109,8 @@ class BluPants(BeagleBoneBlue):
         self.echo = "P9_23"
         self.trigger = "GPIO1_25"
         self.servo_claw = 8
-        self.servo_claw_angle_open = -80.0
-        self.servo_claw_angle_close = 80.0
+        self.servo_claw_angle_open = -45.0
+        self.servo_claw_angle_close = 45.0
         super().__init__(config, config_file)
 
         # Boot
