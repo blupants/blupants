@@ -91,7 +91,8 @@ class BeagleBoneBlue(robots_common.RobotHollow):
 
     def set_motor(self, i=1, duty=0.5, quiet=False):
         self.print_stdout("set_motor(i={}, duty={})".format(i, duty), quiet)
-        self.motors[i - 1].set(duty)
+        motor_index = i-1
+        self.motors[motor_index].set(duty)
 
 
 class BluPants(BeagleBoneBlue):
@@ -205,7 +206,7 @@ class BluPants(BeagleBoneBlue):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
         self.duty = duty
         for i in range(1, 5):
-            self.set_motor(i, duty * self.duty_ratio[i], quiet=True)
+            self.set_motor(i, duty * self.duty_ratio[i-1], quiet=True)
         self.sleep(period, quiet=True)
         for i in range(1, 5):
             self.set_motor(i, 0, quiet=True)
@@ -226,11 +227,11 @@ class BluPants(BeagleBoneBlue):
         duty = 0.3  # Use fixed duty cycle for turning
 
         # Left
-        self.set_motor(self.motor_front_left, duty*-1, quiet=True)
-        self.set_motor(self.motor_back_left, duty*-1, quiet=True)
+        self.set_motor(self.motor_front_left, duty, quiet=True)
+        self.set_motor(self.motor_back_left, duty, quiet=True)
         # Right
-        self.set_motor(self.motor_front_right, duty, quiet=True)
-        self.set_motor(self.motor_back_right, duty, quiet=True)
+        self.set_motor(self.motor_front_right, duty*-1, quiet=True)
+        self.set_motor(self.motor_back_right, duty*-1, quiet=True)
 
         self.sleep(angle * self.turn_right_period, quiet=True)
 
@@ -245,11 +246,11 @@ class BluPants(BeagleBoneBlue):
         duty = 0.3  # Use fixed duty cycle for turning
 
         # Left
-        self.set_motor(self.motor_front_left, duty, quiet=True)
-        self.set_motor(self.motor_back_left, duty, quiet=True)
+        self.set_motor(self.motor_front_left, duty*-1, quiet=True)
+        self.set_motor(self.motor_back_left, duty*-1, quiet=True)
         # Right
-        self.set_motor(self.motor_front_right, duty*-1, quiet=True)
-        self.set_motor(self.motor_back_right, duty*-1, quiet=True)
+        self.set_motor(self.motor_front_right, duty, quiet=True)
+        self.set_motor(self.motor_back_right, duty, quiet=True)
 
         self.sleep(angle * self.turn_right_period, quiet=True)
 
@@ -305,24 +306,17 @@ class BluPantsCar(BluPants):
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
         self.look_angle(0, quiet=True)
-        self.set_servo(self.servo_vertical, 1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
-        self.set_servo(self.servo_vertical, -1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
-        self.set_servo(self.servo_vertical, 1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
+        self.set_servo(self.servo_vertical, 60.0, quiet=True)
+        self.set_servo(self.servo_vertical, -60.0, quiet=True)
+        self.set_servo(self.servo_vertical, 60.0, quiet=True)
         self.look_angle(0, quiet=True)
 
     def say_no(self, quiet=False):
         self.print_stdout("say_no()", quiet)
         self.look_angle(0, quiet=True)
-        self.sleep(0.4, quiet=True)
-        self.set_servo(self.servo_horizontal, 1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
-        self.set_servo(self.servo_horizontal, -1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
-        self.set_servo(self.servo_horizontal, 1.4, quiet=True)
-        self.sleep(0.2, quiet=True)
+        self.set_servo(self.servo_horizontal, 60.0, quiet=True)
+        self.set_servo(self.servo_horizontal, -60.0, quiet=True)
+        self.set_servo(self.servo_horizontal, 60.0, quiet=True)
         self.look_angle(0, quiet=True)
 
 
