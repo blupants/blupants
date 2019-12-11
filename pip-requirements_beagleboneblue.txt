@@ -1,0 +1,6 @@
+Adafruit_BBIO
+rcpy
+pyctrl
+pycrypto
+requests
+flask

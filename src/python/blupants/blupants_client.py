@@ -56,15 +56,15 @@ if robot_id == 2:
 if robot_id == 3:
     robot_name = "ev3"
 
-# TODO refactor this module to be an flask-restful API, so it passivley listen for new code to be executed
-# It will allow the BluPants Studio to send code to it directly to the robots via LAN, rather than this module having
-# to actively send GET requests for new code
 
-
-def _create_rpc_content(code=""):
+def _create_rpc_content(code="", quiet=False):
     rpc_code = _create_rpc_file_header()
-    rpc_code += code
-    rpc_code += "\n\nshutdown(quiet=True)"
+    start_code = "say(\"Initializing code execution!\")\n\n"
+    end_code = "\n\nsay(\"Code execution finished!\")\nshutdown(quiet=True)"
+    if quiet:
+        start_code = ""
+        end_code = ""
+    rpc_code += start_code + code + end_code
     return rpc_code
 
 
@@ -91,8 +91,8 @@ def _reset_rpc_module():
     pass
 
 
-def _exec_rpc_code(code=""):
-    python_code = _create_rpc_content(code)
+def _exec_rpc_code(code="", quiet=False):
+    python_code = _create_rpc_content(code, quiet)
     exec(python_code)
     return
 
@@ -164,7 +164,7 @@ def run():
     dyn_code = "claw_toggle()\n"
     dyn_code += "say_welcome()\n"
     dyn_code += "claw_toggle()\n"
-    _exec_rpc_code(dyn_code)
+    _exec_rpc_code(dyn_code, True)
     _reset_rpc_module()
 
     while running:

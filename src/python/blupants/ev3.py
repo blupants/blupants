@@ -23,6 +23,8 @@ class EV3(robots_common.RobotHollow):
         self.config = config
         self.config_file = config_file
         self.name = "EV3BluPants"
+        self.tts_all_commands = False
+        self.period = 0.02
         self._load_config()
 
         self.motors = []
@@ -88,6 +90,10 @@ class EV3(robots_common.RobotHollow):
                 self.config[key] = default_config[key]
         if "name" in self.config:
             self.name = self.config.get("name")
+        if "tts_all_commands" in self.config:
+            self.tts_all_commands = self.config["tts_all_commands"]
+        if "period" in self.config:
+            self.period = self.config["period"]
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -96,7 +102,8 @@ class EV3(robots_common.RobotHollow):
 
     def sleep(self, seconds=1.0, quiet=False):
         self.print_stdout("sleep(seconds={})".format(seconds), quiet)
-        self.say("Sleeping for {} seconds.".format(seconds), quiet)
+        if self.tts_all_commands:
+            self.say("Sleeping for {} seconds.".format(seconds), quiet)
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0.0, quiet=False):
@@ -144,7 +151,11 @@ class EV3(robots_common.RobotHollow):
         distance = -1
         if self.infrared_sensor:
             distance = self.infrared_sensor.proximity
-        self.say("Distance is {} centimeters.".format(int(distance)), quiet)
+        message = "Distance is {} centimeters.".format(int(distance))
+        if self.tts_all_commands:
+            self.say(message, quiet)
+        else:
+            self.print_stdout(message, quiet)
         return distance
 
     def say(self, message, quiet=False):
@@ -172,7 +183,7 @@ class Gripp3r(EV3):
 
     def _load_config(self):
         super()._load_config()
-        if "ev3" in self.config:
+        if "blupants" in self.config:
             if "motor" in self.config["blupants"]:
                 if "duty_ratio" in self.config["blupants"]["motor"]:
                     self.duty_ratio = self.config["blupants"]["motor"]["duty_ratio"]
@@ -208,13 +219,15 @@ class Gripp3r(EV3):
 
     def claw_open(self, quiet=False):
         self.print_stdout("claw_open()", quiet)
-        self.say("Opening claw.", quiet)
+        if self.tts_all_commands:
+            self.say("Opening claw.", quiet)
         self.grab = True
         self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
 
     def claw_close(self, quiet=False):
         self.print_stdout("claw_close()", quiet)
-        self.say("Closing claw.", quiet)
+        if self.tts_all_commands:
+            self.say("Closing claw.", quiet)
         self.grab = False
         self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
 
@@ -240,7 +253,8 @@ class Gripp3r(EV3):
         block_message = "blocks"
         if blocks > -2 and blocks < 2:
             block_message = "block"
-        self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
+        if self.tts_all_commands:
+            self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
         period = blocks/speed
         self.move(period, speed, quiet=True)
 
@@ -249,13 +263,15 @@ class Gripp3r(EV3):
         block_message = "blocks"
         if blocks > -2 and blocks < 2:
             block_message = "block"
-        self.say("Moving {} {} backwards.".format(blocks, block_message), quiet)
+        if self.tts_all_commands:
+            self.say("Moving {} {} backwards.".format(blocks, block_message), quiet)
         period = blocks/speed
         self.move(period, speed*-1, quiet=True)
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
-        self.say("Turning right {} degrees.".format(angle), quiet)
+        if self.tts_all_commands:
+            self.say("Turning right {} degrees.".format(angle), quiet)
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000
@@ -317,7 +333,8 @@ class Gripp3r(EV3):
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
-        self.say("Turning left {} degrees.".format(angle), quiet)
+        if self.tts_all_commands:
+            self.say("Turning left {} degrees.".format(angle), quiet)
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000
@@ -386,7 +403,7 @@ class Gripp3r(EV3):
 
     def say_welcome(self, quiet=False):
         self.print_stdout("say_welcome()", quiet)
-        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning computer science with me?"\
-            .format(self.name)
+        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning computer science with me? " \
+                  "Visit blupants.org to get started.".format(self.name)
         self.say(message, quiet)
 

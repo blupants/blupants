@@ -9,8 +9,9 @@ def _path(filename):  # noqa: N802
 
 DEFAULT_NAME = "blupants"
 DEFAULT_REQS = [
-    "Adafruit_BBIO",
-    "rcpy"
+    "pycrypto",
+    "requests",
+    "flask"
 ]
 
 if os.path.exists(_path("pip-requirements.txt")):
@@ -22,7 +23,7 @@ else:
 
 setup(
     name=DEFAULT_NAME,
-    version="1.0.0a6",
+    version="1.0.0a7",
     module_name=DEFAULT_NAME,
     python_requires='>=3.4',
     author="BluPants",
@@ -36,7 +37,6 @@ setup(
     install_requires=reqs,
     include_package_data=True,
     scripts=[
-        "bin/blupants",
         "bin/qrcode_wifi",
         "bin/video_stream"
     ]

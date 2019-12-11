@@ -4,10 +4,13 @@ import json
 global default_config
 default_config =\
     {
+        "robot_id": 0,
         "name": "BluPants",
+        "use_opencv": False,
         "measurement_system": "m",
         "step_distance": 0.3,
         "period": 0.02,
+        "tts_all_commands": False,
         "blupants":
             {
                 "claw":
