@@ -36,7 +36,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     Make sure rcpy is installed
     # python3 -m pip install rcpy --upgrade
     https://github.com/StrawsonDesign/librobotcontrol
-    # git clone git@github.com:blupants/blupants.git
+    # git clone https://github.com/blupants/blupants.git
     # git clone https://github.com/StrawsonDesign/librobotcontrol.git
     # cp ./librobotcontrol/examples/src/rc_balance.c ./librobotcontrol/examples/src/rc_balance.c.ORIGINAL
     # cp ./blupants/src/c/rc_balance.c ./librobotcontrol/examples/src/rc_balance.c
@@ -47,6 +47,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cp ./blupants/src/bash/start.sh /etc/robotcontrol
     # rm /etc/robotcontrol/link_to_startup_program
     # ln -s /etc/robotcontrol/start.sh /etc/robotcontrol/link_to_startup_program
+    # chmod +x /etc/robotcontrol/link_to_startup_program
     # python3 -m pip install blupants --upgrade
     # git clone https://github.com/brgl/libgpiod
     # cd libgpiod
@@ -57,7 +58,6 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # mv /usr/local/lib/python3.5/site-packages/* /usr/local/lib/python3.5/dist-packages/.
     # echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
     # cd
-    # chmod +x /etc/robotcontrol/link_to_startup_program
     # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
     # cp -r blupants/src/python/blupants/templates /usr/local/lib/python3.5/dist-packages/blupants/
     # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
