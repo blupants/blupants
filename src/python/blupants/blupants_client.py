@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import random
 import json
 import requests
 import socket
@@ -57,8 +58,8 @@ if robot_id == 3:
     robot_name = "ev3"
 
 
-def _create_rpc_content(code="", quiet=False):
-    rpc_code = _create_rpc_file_header()
+def _create_rpc_content(code="", version=1, quiet=False):
+    rpc_code = _create_rpc_file_header(version)
     start_code = "say(\"Initializing code execution!\")\n\n"
     end_code = "\n\nsay(\"Code execution finished!\")\nshutdown(quiet=True)"
     if quiet:
@@ -68,21 +69,22 @@ def _create_rpc_content(code="", quiet=False):
     return rpc_code
 
 
-def _create_rpc_file_header():
+def _create_rpc_file_header(version=1):
     print("Executing code for robot: [{}]".format(robot_name))
     header_import = ""
     object_definition = "robot = robots.Robot(\"{}\")\n".format(robot_name)
     functions = ""
-    try:
-        for func in dir(robots_common.RobotHollow):
-            line = "{} = robot.{}\n".format(func, func)
-            if not line.startswith("_"):
-                functions += line
-    except:
-        for func in dir(blupants.robots_common.RobotHollow):
-            line = "{} = robot.{}\n".format(func, func)
-            if not line.startswith("_"):
-                functions += line
+    if version <= 1:
+        try:
+            for func in dir(robots_common.RobotHollow):
+                line = "global {}\n{} = robot.{}\n".format(func, func, func)
+                if not func.startswith("_") and not func.startswith("print"):
+                    functions += line
+        except:
+            for func in dir(blupants.robots_common.RobotHollow):
+                line = "global {}\n{} = robot.{}\n".format(func, func, func)
+                if not func.startswith("_") and not func.startswith("print"):
+                    functions += line
     dyn_code = header_import + object_definition + "\n\n" + functions
     return dyn_code
 
@@ -91,8 +93,9 @@ def _reset_rpc_module():
     pass
 
 
-def _exec_rpc_code(code="", quiet=False):
-    python_code = _create_rpc_content(code, quiet)
+def _exec_rpc_code(code="", version=1, quiet=False):
+    python_code = _create_rpc_content(code, version, quiet)
+    print(python_code)
     exec(python_code)
     return
 
@@ -112,7 +115,7 @@ def execute_python_code(py, version=1):
             return
 
     if version >= 1:
-        _exec_rpc_code(py)
+        _exec_rpc_code(py, version)
         return
 
 
@@ -164,7 +167,7 @@ def run():
     dyn_code = "claw_toggle()\n"
     dyn_code += "say_welcome()\n"
     dyn_code += "claw_toggle()\n"
-    _exec_rpc_code(dyn_code, True)
+    _exec_rpc_code(dyn_code, 1, True)
     _reset_rpc_module()
 
     while running:

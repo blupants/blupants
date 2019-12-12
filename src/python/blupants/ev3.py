@@ -102,8 +102,11 @@ class EV3(robots_common.RobotHollow):
 
     def sleep(self, seconds=1.0, quiet=False):
         self.print_stdout("sleep(seconds={})".format(seconds), quiet)
+        seconds_message = "seconds"
+        if -2 < seconds < 2:
+            seconds_message = "second"
         if self.tts_all_commands:
-            self.say("Sleeping for {} seconds.".format(seconds), quiet)
+            self.say("Sleeping for {} {}.".format(seconds, seconds_message), quiet)
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0.0, quiet=False):
@@ -251,7 +254,7 @@ class Gripp3r(EV3):
     def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         block_message = "blocks"
-        if blocks > -2 and blocks < 2:
+        if -2 < blocks < 2:
             block_message = "block"
         if self.tts_all_commands:
             self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
@@ -403,7 +406,7 @@ class Gripp3r(EV3):
 
     def say_welcome(self, quiet=False):
         self.print_stdout("say_welcome()", quiet)
-        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning computer science with me? " \
+        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning Computer Science with me? " \
                   "Visit blupants.org to get started.".format(self.name)
         self.say(message, quiet)
 
