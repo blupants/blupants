@@ -45,9 +45,11 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cp ./examples/bin/rc_balance /usr/bin/rc_balance_dstr
     # cd
     # cp ./blupants/src/bash/start.sh /etc/robotcontrol
-    # rm /etc/robotcontrol/link_to_startup_program
-    # ln -s /etc/robotcontrol/start.sh /etc/robotcontrol/link_to_startup_program
-    # chmod +x /etc/robotcontrol/link_to_startup_program
+    # chmod +x /etc/robotcontrol/start.sh
+    # cp ./blupants/etc/blupants.service /etc/systemd/system/
+    # mdkir /var/lib/cloud9/BluPants
+    # cp ./blupants/src/python/*.py /var/lib/cloud9/BluPants/
+    # chmod +s /usr/bin/python3
     # python3 -m pip install blupants --upgrade
     # git clone https://github.com/brgl/libgpiod
     # cd libgpiod
@@ -61,5 +63,6 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
     # cp -r blupants/src/python/blupants/templates /usr/local/lib/python3.5/dist-packages/blupants/
     # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
-    # /etc/robotcontrol/link_to_startup_program
+    # systemctl daemon-reload
+    # systemctl enable blupants.service
     

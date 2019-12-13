@@ -34,6 +34,10 @@ global robot_name
 robot_name = ""
 
 
+global dynamic_code_file
+dynamic_code_file = "/tmp/blupants/blupants_rpc.py"
+
+
 global config_file
 config_file = "/root/blupants.json"
 
@@ -97,7 +101,13 @@ def _exec_rpc_code(code="", version=1, quiet=False):
     python_code = _create_rpc_content(code, version, quiet)
     print(python_code)
     exec(python_code)
-    return
+    try:
+        with open(dynamic_code_file, "w") as f:
+            rpc_headers = "import blupants.robots_common as robots_common\n" \
+                          "import blupants.robots as robots\n"
+            f.write(rpc_headers + python_code)
+    except:
+        pass
 
 
 def execute_python_code(py, version=1):

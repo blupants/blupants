@@ -1,0 +1,12 @@
+framerate 30
+stream_port 8081
+stream_localhost off
+stream_quality 40
+stream_maxrate 5
+stream_preview_scale 100
+output_pictures off
+target_dir /tmp/blupants
+ffmpeg_video_codec mpeg4
+v4l2_palette 8
+width 320
+height 240

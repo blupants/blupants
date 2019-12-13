@@ -1,0 +1,10 @@
+[Unit]
+Description=BluPants
+After=multi-user.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/etc/robotcontrol/start.sh
