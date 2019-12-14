@@ -194,7 +194,10 @@ class BluPants(BeagleBoneBlue):
         distance = 0
         # Read sonar
         distance = self._distance_measurement()
-        system = self.config.get("measurement_system").lower()
+        try:
+            system = self.config.get("measurement_system").lower()
+        except:
+            system = "m"
         if system == "r" or system == "i" or system == "b":
             distance = distance * 0.393701
             self.print_stdout("Distance: [{}] inches.".format(str(distance)), quiet)

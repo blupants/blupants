@@ -35,7 +35,8 @@ if ls /boot/uEnv.txt  1> /dev/null 2>&1; then
   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
   sleep 5
 
-  /usr/bin/rc_balance_dstr -i dstr &
+  # If robot is EduMip, uncomment the next line
+  #/usr/bin/rc_balance_dstr -i dstr &
 fi
 
 echo "Ready to start blupants_client!"
