@@ -64,8 +64,8 @@ if robot_id == 3:
 
 def _create_rpc_content(code="", version=1, quiet=False):
     rpc_code = _create_rpc_file_header(version)
-    start_code = "say(\"Initializing code execution!\")\n\n"
-    end_code = "\n\nsay(\"Code execution finished!\")\nshutdown(quiet=True)"
+    start_code = "robot.say(\"Initializing code execution!\")\n\n"
+    end_code = "\n\nrobot.say(\"Code execution finished!\")\nrobot.shutdown(quiet=True)"
     if quiet:
         start_code = ""
         end_code = ""
@@ -74,22 +74,9 @@ def _create_rpc_content(code="", version=1, quiet=False):
 
 
 def _create_rpc_file_header(version=1):
-    print("Executing code for robot: [{}]".format(robot_name))
     header_import = ""
     object_definition = "robot = robots.Robot(\"{}\")\n".format(robot_name)
-    functions = ""
-    if version <= 1:
-        try:
-            for func in dir(robots_common.RobotHollow):
-                line = "global {}\n{} = robot.{}\n".format(func, func, func)
-                if not func.startswith("_") and not func.startswith("print"):
-                    functions += line
-        except:
-            for func in dir(blupants.robots_common.RobotHollow):
-                line = "global {}\n{} = robot.{}\n".format(func, func, func)
-                if not func.startswith("_") and not func.startswith("print"):
-                    functions += line
-    dyn_code = header_import + object_definition + "\n\n" + functions
+    dyn_code = header_import + object_definition + "\n\n"
     return dyn_code
 
 
@@ -98,13 +85,14 @@ def _reset_rpc_module():
 
 
 def _exec_rpc_code(code="", version=1, quiet=False):
+    print("Executing code for robot: [{}]".format(robot_name))
     python_code = _create_rpc_content(code, version, quiet)
     print(python_code)
     exec(python_code)
     try:
         with open(dynamic_code_file, "w") as f:
             rpc_headers = "import blupants.robots_common as robots_common\n" \
-                          "import blupants.robots as robots\n"
+                          "import blupants.robots as robots\n\n"
             f.write(rpc_headers + python_code)
     except:
         pass
@@ -174,9 +162,9 @@ def run():
     global running
     running = True
 
-    dyn_code = "claw_toggle()\n"
-    dyn_code += "say_welcome()\n"
-    dyn_code += "claw_toggle()\n"
+    dyn_code = "robot.claw_toggle()\n"
+    dyn_code += "robot.say_welcome()\n"
+    dyn_code += "robot.claw_toggle()\n"
     _exec_rpc_code(dyn_code, 1, True)
     _reset_rpc_module()
 

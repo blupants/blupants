@@ -147,10 +147,7 @@ class RobotHollow:
             self.standard_output.print(message)
 
     def print(self, message, quiet=False):
-        try:
-            self.say(message, quiet)
-        except:
-            self._warning("print")
+        self.print_stdout(message, quiet)
 
     def say_yes(self, quiet=False):
         try:
@@ -171,7 +168,7 @@ class RobotHollow:
             self._warning("say_welcome")
 
     def say(self, message, quiet=False):
-        self.print_stdout(message, quiet)
+        self.print(message, quiet)
 
     def claw_toggle(self):
         self._warning("claw_toggle")
