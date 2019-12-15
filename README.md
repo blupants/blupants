@@ -61,7 +61,6 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
     # cd
     # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
-    # cp -r blupants/src/python/blupants/templates /usr/local/lib/python3.5/dist-packages/blupants/
     # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
     # systemctl daemon-reload
     # systemctl enable blupants.service
