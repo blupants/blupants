@@ -75,7 +75,7 @@ def _create_rpc_content(code="", version=1, quiet=False):
 
 def _create_rpc_file_header(version=1):
     header_import = ""
-    object_definition = "robot = robots.Robot(\"{}\")\n".format(robot_name)
+    object_definition = "global robot\nrobot = robots.Robot(\"{}\")\n".format(robot_name)
     dyn_code = header_import + object_definition + "\n\n"
     return dyn_code
 
