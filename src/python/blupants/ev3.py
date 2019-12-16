@@ -406,7 +406,7 @@ class Gripp3r(EV3):
 
     def say_welcome(self, quiet=False):
         self.print_stdout("say_welcome()", quiet)
-        message = "Welcome to blu pants! My name is {} robot. Are you ready for learning Computer Science with me? " \
+        message = "Welcome to BluPants! My name is {} robot. Are you ready for learning Computer Science with me? " \
                   "Visit blupants.org to get started.".format(self.name)
         self.say(message, quiet)
 
