@@ -143,16 +143,16 @@ def run(max_tries=-1):
     else:
         print("Error opening video stream or file")
 
-    pos_h_begin = -0.3
-    pos_v_begin = 0
+    pos_begin = -0.3
     pos_end = 0.4
-    step = 0.1
-    pos_v = pos_v_begin
-    pos_h = pos_h_begin
+    step_h = step_v = 0.1
+    pos_v = 0
+    pos_h = pos_begin
     counter = 0
     # Read until video is completed
     while cap.isOpened():
         servo_vert.set(pos_v)
+        time.sleep(0.3)
         servo_hor.set(pos_h)
         counter += 1
         time.sleep(0.25)
@@ -181,17 +181,28 @@ def run(max_tries=-1):
             break
         if ret:
             # Servo sweep
-            if pos_h > pos_end:
-                pos_h = pos_h_begin
-                pos_v += step
-                if pos_v > pos_end:
-                    pos_v = pos_v_begin
+            if pos_begin > pos_h or pos_h > pos_end:
+                step_h *= -1
+                pos_h += step_h
+                pos_v += step_v
+                if pos_begin > pos_v or pos_v > pos_end:
+                    step_v *= -1
+                    pos_v += step_v
             else:
-                pos_h += step
+                pos_h += step_h
         else:
             servo_vert.set(pos_v*-1)
+            time.sleep(0.3)
             servo_hor.set(pos_h*-1)
             time.sleep(2)
+
+        pos_h = round(pos_h, 2)
+        pos_v = round(pos_v, 2)
+
+        if (counter % 15) == 0:
+            if wifi_connected():
+                print("Successfully connected to WiFi.")
+                break
     cap.release()
     print("Done!")
 
