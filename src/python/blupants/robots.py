@@ -108,6 +108,20 @@ except:
     pass
 
 try:
+    import raspberrypi
+except:
+    try:
+        import blupants.raspberrypi as raspberrypi
+    except:
+        pass
+try:
+    factory.register_robot("generic", raspberrypi.RaspberryPi)
+    factory.register_robot("raspberrypi", raspberrypi.RaspberryPi)
+    factory.register_robot("pi", raspberrypi.RaspberryPi)
+except:
+    pass
+
+try:
     import ev3
 except:
     try:
