@@ -76,6 +76,11 @@ class RaspberryPi(robots_common.RobotHollow):
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
         self.running = False
+        self.hcsr04.close()
+        for servo in self.pi_servos:
+            servo.close()
+        for motor in self.motors:
+            motor.close()
 
     def sleep(self, seconds=1.0, quiet=False):
         self.print_stdout("sleep(seconds={})".format(seconds), quiet)

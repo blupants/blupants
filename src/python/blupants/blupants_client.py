@@ -60,6 +60,8 @@ if robot_id == 2:
     robot_name = "gripper"
 if robot_id == 3:
     robot_name = "ev3"
+if robot_id == 4:
+    robot_name = "raspberrypi"
 
 
 def _create_rpc_content(code="", version=1, quiet=False):
@@ -68,7 +70,7 @@ def _create_rpc_content(code="", version=1, quiet=False):
     end_code = "\n\nrobot.say(\"Code execution finished!\")\nrobot.shutdown(quiet=True)"
     if quiet:
         start_code = ""
-        end_code = ""
+        end_code = "\nrobot.shutdown(quiet=True)"
     rpc_code += start_code + code + end_code
     return rpc_code
 

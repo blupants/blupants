@@ -44,6 +44,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # make
     # cp ./examples/bin/rc_balance /usr/bin/rc_balance_dstr
     # cd
+    # mkdir -p /etc/robotcontrol
     # cp ./blupants/src/bash/start.sh /etc/robotcontrol
     # chmod +x /etc/robotcontrol/start.sh
     # cp ./blupants/etc/blupants.service /etc/systemd/system/
