@@ -34,17 +34,33 @@ class RaspberryPi(robots_common.RobotHollow):
         if "period" in self.config:
             period = self.config["period"]
 
+        self.camera_pos = 0
+        self.camera_toggle_positions = [
+            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
+            [89.0, -30.0], [89.0, 0], [0, 0]
+        ]
+
+        if "blupants" in self.config:
+            if "camera" in self.config["blupants"]:
+                if "servo_horizontal" in self.config["blupants"]["camera"]:
+                    self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
+                if "servo_vertical" in self.config["blupants"]["camera"]:
+                    self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
+
         self.grab = True
-        self.servo_claw = 0
+        self.servo_claw = 1
         self.servo_claw_angle_open = -60
         self.servo_claw_angle_close = 60
+
+        self.servo_horizontal = 2
+        self.servo_vertical = 3
 
         self.IN1 = 7
         self.IN2 = 8
         self.IN3 = 9
         self.IN4 = 10
 
-        GPIO_SERVOS = [17]
+        GPIO_SERVOS = [17, 27, 22]
 
         GPIO_TRIGGER = 18
         GPIO_ECHO = 24
@@ -187,31 +203,81 @@ class RaspberryPi(robots_common.RobotHollow):
         for motor in self.motors:
             motor.stop()
 
+    def camera_toggle(self, quiet=False):
+        self.print_stdout("camera_toggle()", quiet)
+        max = len(self.camera_toggle_positions)
+        if self.camera_pos >= max:
+            self.camera_pos = 0
+        pos = self.camera_toggle_positions[self.camera_pos]
+        self.sleep(0.2, quiet=True)
+        self.set_servo(self.servo_horizontal, pos[0], quiet=True)
+        self.sleep(0.2, quiet=True)
+        self.set_servo(self.servo_vertical, pos[1], quiet=True)
+        self.sleep(0.2, quiet=True)
+        self.camera_pos += 1
+
+    def look_angle(self, angle=90, quiet=False):
+        self.print_stdout("look_angle(angle={})".format(angle), quiet)
+        self.sleep(0.2, quiet=True)
+        if angle > 0 and angle > 90:
+            angle = 90
+        if angle < 0 and angle < -90:
+            angle = -90
+        position = angle * 0.015
+        self.set_servo(self.servo_horizontal, position, quiet=True)
+        self.set_servo(self.servo_vertical, 0, quiet=True)
+        self.sleep(0.2, quiet=True)
+
+    def say_yes(self, quiet=False):
+        self.print_stdout("say_yes()", quiet)
+        self.look_angle(0, quiet=True)
+        self.set_servo(self.servo_vertical, 60.0, quiet=True)
+        self.set_servo(self.servo_vertical, -60.0, quiet=True)
+        self.set_servo(self.servo_vertical, 60.0, quiet=True)
+        self.look_angle(0, quiet=True)
+
+    def say_no(self, quiet=False):
+        self.print_stdout("say_no()", quiet)
+        self.look_angle(0, quiet=True)
+        self.set_servo(self.servo_horizontal, 60.0, quiet=True)
+        self.set_servo(self.servo_horizontal, -60.0, quiet=True)
+        self.set_servo(self.servo_horizontal, 60.0, quiet=True)
+        self.look_angle(0, quiet=True)
+
 
 def test():
     a = RaspberryPi()
     print("Test 005")
-    a.claw_open()
+    a.say_yes()
+    #a.claw_open()
     a.sleep(1)
-    a.claw_close()
-    d = a.read_distance()
-    print(d)
-    a.move_forward()
-    time.sleep(1)
-    a.turn_right()
-    time.sleep(1)
-    a.turn_left()
-    time.sleep(1)
-    a.move_backwards()
-    time.sleep(1)
-    a.set_motor(1, -1)
-    time.sleep(1)
-    a.set_motor(2, 0.6)
-    time.sleep(4)
-    a.set_motor(1, 0)
-    a.set_motor(2, 0)
-    time.sleep(1)
-    a.move_forward()
+    #a.claw_close()
+    a.say_no()
+    for i in range(0, 20):
+        a.camera_toggle()
+        print(i)
+        time.sleep(0.3)
+    a.say_no()
+    a.look_angle(0)
+    a.sleep(1)
+    # d = a.read_distance()
+    # print(d)
+    # a.move_forward()
+    # time.sleep(1)
+    # a.turn_right()
+    # time.sleep(1)
+    # a.turn_left()
+    # time.sleep(1)
+    # a.move_backwards()
+    # time.sleep(1)
+    # a.set_motor(1, -1)
+    # time.sleep(1)
+    # a.set_motor(2, 0.6)
+    # time.sleep(4)
+    # a.set_motor(1, 0)
+    # a.set_motor(2, 0)
+    # time.sleep(1)
+    # a.move_forward()
     a.shutdown()
 
 

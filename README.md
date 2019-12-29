@@ -48,7 +48,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # cp ./blupants/src/bash/start.sh /etc/robotcontrol
     # chmod +x /etc/robotcontrol/start.sh
     # cp ./blupants/etc/blupants.service /etc/systemd/system/
-    # mdkir -p /var/lib/cloud9/BluPants
+    # mkdir -p /var/lib/cloud9/BluPants
     # cp ./blupants/src/python/*.py /var/lib/cloud9/BluPants/
     # chmod +s /usr/bin/python3
     # python3 -m pip install blupants --upgrade
