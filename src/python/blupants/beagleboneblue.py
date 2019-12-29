@@ -333,7 +333,7 @@ class EduMIP(BluPants):
         self.servo_shoulder_right = 6
         self.servo_claw_angle_open = 45.0
         self.servo_claw_angle_close = 30.0
-        self.var_dir = os.path.join(os.sep, "tmp", os.sep, "blupants")
+        self.var_dir = "/tmp/blupants/"
         print("Make sure you have eduMPI balanced before running this script.")
         print("#rc_balance_dstr -i dstr")
         if "EduMIP" in self.config:
@@ -363,15 +363,16 @@ class EduMIP(BluPants):
             self._create_cmd_file("up.txt.")
         else:
             self._create_cmd_file("down.txt.")
+            distance_meter *= -1
         self.sleep(self.meter_coefficient * distance_meter, quiet=True)
         self._create_cmd_file("break.txt.")
         self.sleep(2, quiet=True)
 
-    def move_forward(self, blocks=1, quiet=False):
+    def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={})".format(blocks), quiet)
         self.move(self.block_length*blocks, quiet=True)
 
-    def move_backwards(self, blocks=1, quiet=False):
+    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_backwards(blocks={})".format(blocks), quiet)
         self.move(self.block_length*blocks*-1, quiet=True)
 

@@ -374,7 +374,7 @@ void* __setpoint_manager(__attribute__ ((unused)) void* ptr)
 		}
 
 		FILE *file;
-		char var_file_dir[50] = "/tmp/";
+		char var_file_dir[50] = "/tmp/blupants/";
 		char up_str[20] = "up.txt.";
 		char down_str[20] = "down.txt.";
 		char left_str[20] = "left.txt.";
