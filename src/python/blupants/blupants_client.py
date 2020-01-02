@@ -62,6 +62,8 @@ if robot_id == 3:
     robot_name = "ev3"
 if robot_id == 4:
     robot_name = "raspberrypi"
+if robot_id == 5:
+    robot_name = "beagleboneblack"
 
 
 def _create_rpc_content(code="", version=1, quiet=False):
