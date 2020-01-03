@@ -206,8 +206,8 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         return distance
 
     def _stop(self):
-        self.set_motor(0, 0, quiet=True)
         self.set_motor(1, 0, quiet=True)
+        self.set_motor(2, 0, quiet=True)
 
     def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
@@ -299,8 +299,8 @@ def test():
     a = BeagleBoneBlack()
     print("Test 005")
 
-    a.turn_left()
-    a.turn_right()
+    # a.turn_left()
+    # a.turn_right()
 
     # a.say_yes()
 
@@ -308,8 +308,9 @@ def test():
     #     print(i)
     #     a.camera_toggle()
     #
-    # a.move_forward()
-    # a.move_backwards()
+    a.move_forward()
+    a.sleep(5)
+    a.move_backwards()
     #
     #a.look_angle(90)
 
