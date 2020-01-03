@@ -122,6 +122,20 @@ except:
     pass
 
 try:
+    import beagleboneblack
+except:
+    try:
+        import blupants.beagleboneblack as beagleboneblack
+    except:
+        pass
+try:
+    factory.register_robot("generic", beagleboneblack.BeagleBoneBlack)
+    factory.register_robot("beagleboneblack", beagleboneblack.BeagleBoneBlack)
+    factory.register_robot("black", beagleboneblack.BeagleBoneBlack)
+except:
+    pass
+
+try:
     import ev3
 except:
     try:

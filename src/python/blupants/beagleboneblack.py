@@ -26,8 +26,8 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.name = "BeagleBoneBlack"
         self.duty = 0.5
         self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
-        self.turn_right_period = 0.005
-        self.turn_left_period = 0.005
+        self.turn_right_period = 0.03
+        self.turn_left_period = 0.03
         self._load_config()
         period = 0.02
         if "period" in self.config:
@@ -54,12 +54,12 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.servo_horizontal = 2
         self.servo_vertical = 3
 
-        self.ENA = "P9_22"
+        self.ENA = "P9_21"
         self.IN1 = "P9_23"
-        self.IN2 = "P9_14"
-        self.IN3 = "P9_15"
-        self.IN4 = "P9_16"
-        self.ENB = "P9_21"
+        self.IN2 = "P9_27"
+        self.IN3 = "P9_26"
+        self.IN4 = "P9_24"
+        self.ENB = "P9_22"
 
         PWM.start(self.ENA, 0, 1000)
         PWM.start(self.ENB, 0, 1000)
@@ -85,6 +85,9 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         time.sleep(0.5)
 
         self.running = True
+
+        self.look_angle(90)
+        self.claw_open()
 
     def _load_config(self):
         if len(self.config_file) and os.path.isfile(self.config_file):
@@ -124,23 +127,28 @@ class BeagleBoneBlack(robots_common.RobotHollow):
     def set_motor(self, i=1, duty=0.5, quiet=False):
         self.print_stdout("set_motor(i={}, duty={})".format(i, duty), quiet)
         motor_index = i-1
-        if duty < 0:
-            duty *= -1
-
-        if duty < 0:
-            GPIO.output(self.IN1, GPIO.HIGH)
-            GPIO.output(self.IN2, GPIO.LOW)
-            GPIO.output(self.IN3, GPIO.HIGH)
-            GPIO.output(self.IN4, GPIO.LOW)
-        else:
-            GPIO.output(self.IN1, GPIO.LOW)
-            GPIO.output(self.IN2, GPIO.HIGH)
-            GPIO.output(self.IN3, GPIO.LOW)
-            GPIO.output(self.IN4, GPIO.HIGH)
-        enable = self.ENA
+        enable = None
         if motor_index > 0:
             enable = self.ENB
-        PWM.set_duty_cycle(enable, duty)
+            if duty < 0:
+                GPIO.output(self.IN3, GPIO.HIGH)
+                GPIO.output(self.IN4, GPIO.LOW)
+            else:
+                GPIO.output(self.IN3, GPIO.LOW)
+                GPIO.output(self.IN4, GPIO.HIGH)
+        else:
+            enable = self.ENA
+            if duty < 0:
+                GPIO.output(self.IN1, GPIO.LOW)
+                GPIO.output(self.IN2, GPIO.HIGH)
+            else:
+                GPIO.output(self.IN1, GPIO.HIGH)
+                GPIO.output(self.IN2, GPIO.LOW)
+
+        if duty < 0:
+            duty *= -1
+        if enable:
+            PWM.set_duty_cycle(enable, duty)
 
     def claw_toggle(self, quiet=False):
         if self.grab:
@@ -204,27 +212,29 @@ class BeagleBoneBlack(robots_common.RobotHollow):
     def move_forward(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
-        self.set_motor(0, speed, quiet=True)
+        speed *= 100
         self.set_motor(1, speed, quiet=True)
+        self.set_motor(2, speed, quiet=True)
         self.sleep(period, quiet=True)
         self._stop()
 
     def move_backwards(self, blocks=1, speed=0.5, quiet=False):
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
-        self.set_motor(0, speed * -1, quiet=True)
+        speed *= 100
         self.set_motor(1, speed * -1, quiet=True)
+        self.set_motor(2, speed * -1, quiet=True)
         self.sleep(period, quiet=True)
         self._stop()
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
-        duty = 0.5  # Use fixed duty cycle for turning
+        duty = 30  # Use fixed duty cycle for turning
 
         # Left motor
-        self.set_motor(0, duty, quiet=True)
+        self.set_motor(1, duty, quiet=True)
         # Right motor
-        self.set_motor(1, duty * -1, quiet=True)
+        self.set_motor(2, duty * -1, quiet=True)
 
         self.sleep(angle * self.turn_right_period, quiet=True)
 
@@ -232,12 +242,12 @@ class BeagleBoneBlack(robots_common.RobotHollow):
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
-        duty = 0.5  # Use fixed duty cycle for turning
+        duty = 30  # Use fixed duty cycle for turning
 
         # Left motor
-        self.set_motor(0, duty * -1)
+        self.set_motor(1, duty * -1)
         # Right motor
-        self.set_motor(1, duty)
+        self.set_motor(2, duty)
 
         self.sleep(angle * self.turn_right_period, quiet=True)
 
@@ -287,14 +297,31 @@ class BeagleBoneBlack(robots_common.RobotHollow):
 
 def test():
     a = BeagleBoneBlack()
-    print("Test 001")
+    print("Test 005")
+
+    a.turn_left()
+    a.turn_right()
+
     # a.say_yes()
 
-    for i in range(0, 10):
-        a.claw_toggle()
-        d = a.read_distance()
-        print("distance is: {}".format(d))
-        time.sleep(2)
+    # for i in range(0, 2):
+    #     print(i)
+    #     a.camera_toggle()
+    #
+    # a.move_forward()
+    # a.move_backwards()
+    #
+    #a.look_angle(90)
+
+    # a.test1ff()
+    # a.test1back()
+    # a.test1ff()
+
+    # for i in range(0, 2):
+    #     a.claw_toggle()
+    #     d = a.read_distance()
+    #     print("distance is: {}".format(d))
+    #     time.sleep(2)
     # a.set_servo(1, -30)
     # a.sleep(3)
     # a.set_servo(1, -40)
@@ -352,13 +379,13 @@ def test():
     # time.sleep(3)
 
 
-
     # a.claw_open()
     # a.sleep(5)
     # a.claw_close()
     # a.sleep(2)
+    # a.say_yes()
     # a.say_no()
-    # for i in range(0, 20):
+    # for i in range(0, 11):
     #     a.camera_toggle()
     #     print(i)
     #     time.sleep(0.3)
@@ -383,8 +410,9 @@ def test():
     # a.set_motor(2, 0)
     # time.sleep(1)
     # a.move_forward()
+    # a.look_angle(90)
     a.shutdown()
 
 
-test()
+#test()
 
