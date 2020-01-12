@@ -49,10 +49,10 @@ class RaspberryPi(robots_common.RobotHollow):
         self.IN3 = 9
         self.IN4 = 10
 
-        self.IN1 = self.config["raspberrypi"]["motor"]["pinout"]["EN1"]
-        self.IN2 = self.config["raspberrypi"]["motor"]["pinout"]["EN2"]
-        self.IN3 = self.config["raspberrypi"]["motor"]["pinout"]["EN3"]
-        self.IN4 = self.config["raspberrypi"]["motor"]["pinout"]["EN4"]
+        self.IN1 = self.config["raspberrypi"]["motor"]["pinout"]["IN1"]
+        self.IN2 = self.config["raspberrypi"]["motor"]["pinout"]["IN2"]
+        self.IN3 = self.config["raspberrypi"]["motor"]["pinout"]["IN3"]
+        self.IN4 = self.config["raspberrypi"]["motor"]["pinout"]["IN4"]
 
         self.servos = [17, 27, 22]
         self.servos = self.config["raspberrypi"]["servos"]

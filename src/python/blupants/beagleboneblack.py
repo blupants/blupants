@@ -50,10 +50,10 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.ENB = "P9_22"
 
         self.ENA = self.config["beagleboneblack"]["motor"]["pinout"]["ENA"]
-        self.IN1 = self.config["beagleboneblack"]["motor"]["pinout"]["EN1"]
-        self.IN2 = self.config["beagleboneblack"]["motor"]["pinout"]["EN2"]
-        self.IN3 = self.config["beagleboneblack"]["motor"]["pinout"]["EN3"]
-        self.IN4 = self.config["beagleboneblack"]["motor"]["pinout"]["EN4"]
+        self.IN1 = self.config["beagleboneblack"]["motor"]["pinout"]["IN1"]
+        self.IN2 = self.config["beagleboneblack"]["motor"]["pinout"]["IN2"]
+        self.IN3 = self.config["beagleboneblack"]["motor"]["pinout"]["IN3"]
+        self.IN4 = self.config["beagleboneblack"]["motor"]["pinout"]["IN4"]
         self.ENB = self.config["beagleboneblack"]["motor"]["pinout"]["ENB"]
 
         PWM.start(self.ENA, 0, 1000)
