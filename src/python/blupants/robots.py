@@ -41,7 +41,7 @@ class Robot(robots_common.RobotHollow):
     def move_forward(self, blocks=1, speed=-1):
         return self._robot.move_forward(blocks, speed)
 
-    def move_backwards(self, blocks=1, speed=0.5):
+    def move_backwards(self, blocks=1, speed=-1):
         return self._robot.move_backwards(blocks, speed)
 
     def turn_right(self, angle=90):

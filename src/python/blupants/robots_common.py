@@ -189,7 +189,7 @@ class RobotHollow:
         self._warning("move_forward")
         pass
 
-    def move_backwards(self, blocks=1, speed=0.5):
+    def move_backwards(self, blocks=1, speed=-1):
         self._warning("move_backwards")
 
     def turn_right(self, angle=90):
