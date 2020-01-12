@@ -36,7 +36,8 @@ fi
 echo "WiFi setup completed!"
 
 if ls /boot/uEnv.txt  1> /dev/null 2>&1; then
-  /usr/bin/rc_blink &
+  #/usr/bin/rc_blink &
+  /usr/bin/rc_test_leds
   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
   sleep 5
 
