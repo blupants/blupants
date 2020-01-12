@@ -24,11 +24,10 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.config = config
         self.config_file = config_file
         self.name = "BeagleBoneBlack"
-        self.duty = 0.5
+        self.duty = self.config["duty"]
         self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
         self.turn_right_period = 0.03
         self.turn_left_period = 0.03
-        self._load_config()
         period = 0.02
         if "period" in self.config:
             period = self.config["period"]
@@ -88,16 +87,6 @@ class BeagleBoneBlack(robots_common.RobotHollow):
 
         self.look_angle(90)
         self.claw_open()
-
-    def _load_config(self):
-        if len(self.config_file) and os.path.isfile(self.config_file):
-            with open(self.config_file, "r") as f:
-                json.load(self.config, f)
-        for key in default_config:
-            if key not in self.config:
-                self.config[key] = default_config[key]
-        if "name" in self.config:
-            self.name = self.config.get("name")
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -209,7 +198,9 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.set_motor(1, 0, quiet=True)
         self.set_motor(2, 0, quiet=True)
 
-    def move_forward(self, blocks=1, speed=0.5, quiet=False):
+    def move_forward(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         speed *= 100
@@ -218,7 +209,9 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.sleep(period, quiet=True)
         self._stop()
 
-    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
+    def move_backwards(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         speed *= 100

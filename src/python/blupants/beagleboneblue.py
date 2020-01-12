@@ -17,21 +17,13 @@ except:
     import blupants.robots_common as robots_common
 
 
-global default_config
-default_config = robots_common.default_config
-
-
 class BeagleBoneBlue(robots_common.RobotHollow):
-    def __init__(self, config={}, config_file=""):
+    def __init__(self):
         super().__init__()
         self.running = False
-        self.config = config
-        self.config_file = config_file
-        self.name = "BeagleBoneBlue"
-        self._load_config()
-        period = 0.02
-        if "period" in self.config:
-            period = self.config["period"]
+        self.name = self.config["name"]
+        self.period = self.config["period"]
+        period = self.period
 
         self.bbb_servos = [servo.Servo(1), servo.Servo(2), servo.Servo(3), servo.Servo(4), servo.Servo(5),
                            servo.Servo(6), servo.Servo(7), servo.Servo(8)]
@@ -52,16 +44,6 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         for i in range(0, 8):
             self.clcks[i].start()
         self.running = True
-
-    def _load_config(self):
-        if len(self.config_file) and os.path.isfile(self.config_file):
-            with open(self.config_file, "r") as f:
-                json.load(self.config, f)
-        for key in default_config:
-            if key not in self.config:
-                self.config[key] = default_config[key]
-        if "name" in self.config:
-            self.name = self.config.get("name")
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -96,55 +78,33 @@ class BeagleBoneBlue(robots_common.RobotHollow):
 
 
 class BluPants(BeagleBoneBlue):
-    def __init__(self, config={}, config_file=""):
-        self.duty = 0.5
-        self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
-        self.turn_right_period = 0.005
-        self.turn_left_period = 0.005
-        self.motor_front_left = 1
-        self.motor_front_right = 2
-        self.motor_back_left = 3
-        self.motor_back_right = 4
+    def __init__(self):
+        self.duty = self.config["duty"]
+        self.duty_ratio = self.config["blupants"]["motor"]["duty_ratio"]
+        self.turn_right_period = self.config["blupants"]["motor"]["turn_right_period"]
+        self.turn_left_period = self.config["blupants"]["motor"]["turn_left_period"]
+        self.motor_front_left = self.config["blupants"]["motor"]["position"]["front_left"]
+        self.motor_front_right = self.config["blupants"]["motor"]["position"]["front_right"]
+        self.motor_back_left = self.config["blupants"]["motor"]["position"]["back_left"]
+        self.motor_back_right = self.config["blupants"]["motor"]["position"]["back_right"]
         self.grab = True
         self.echo = "P9_23"
+        self.echo = self.config["blupants"]["hcsr04"]["echo"]
         self.trigger = "GPIO1_25"
+        self.trigger = self.config["blupants"]["hcsr04"]["trigger"]
         self.servo_claw = 8
+        self.servo_claw = self.config["blupants"]["claw"]["servo"]
         self.servo_claw_angle_open = -45.0
+        self.servo_claw_angle_open = self.config["blupants"]["claw"]["angle_open"]
         self.servo_claw_angle_close = 45.0
-        super().__init__(config, config_file)
+        self.servo_claw_angle_close = self.config["blupants"]["claw"]["angle_close"]
+        super().__init__()
 
         # Boot
         # Configuration
-        GPIO.setup(self.trigger , GPIO.OUT)  # Trigger
+        GPIO.setup(self.trigger, GPIO.OUT)  # Trigger
         GPIO.setup(self.echo, GPIO.IN)  # Echo
         GPIO.output(self.trigger, False)
-
-    def _load_config(self):
-        super()._load_config()
-        if "blupants" in self.config:
-            if "motor" in self.config["blupants"]:
-                if "duty_ratio" in self.config["blupants"]["motor"]:
-                    self.duty_ratio = self.config["blupants"]["motor"]["duty_ratio"]
-                if "turn_right_period" in self.config["blupants"]["motor"]:
-                    self.turn_right_period = self.config["blupants"]["motor"]["turn_right_period"]
-                if "turn_left_period" in self.config["blupants"]["motor"]:
-                    self.turn_left_period = self.config["blupants"]["motor"]["turn_left_period"]
-                if "position" in self.config["blupants"]["motor"]:
-                    if "front_left" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_front_left = self.config["blupants"]["motor"]["position"]["front_left"]
-                    if "front_right" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_front_right = self.config["blupants"]["motor"]["position"]["front_right"]
-                    if "back_left" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_back_left = self.config["blupants"]["motor"]["position"]["back_left"]
-                    if "back_right" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_back_right = self.config["blupants"]["motor"]["position"]["back_right"]
-            if "claw" in self.config["blupants"]:
-                if "servo" in self.config["blupants"]["claw"]:
-                    self.servo_claw = self.config["blupants"]["claw"]["servo"]
-                if "angle_open" in self.config["blupants"]["claw"]:
-                    self.servo_claw_angle_open = self.config["blupants"]["claw"]["angle_open"]
-                if "angle_close" in self.config["blupants"]["claw"]:
-                    self.servo_claw_angle_close = self.config["blupants"]["claw"]["angle_close"]
 
     def _distance_measurement(self):
         max = 10000
@@ -207,19 +167,22 @@ class BluPants(BeagleBoneBlue):
 
     def move(self, period=1, duty=1, quiet=False):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
-        self.duty = duty
         for i in range(1, 5):
             self.set_motor(i, duty * self.duty_ratio[i-1], quiet=True)
         self.sleep(period, quiet=True)
         for i in range(1, 5):
             self.set_motor(i, 0, quiet=True)
 
-    def move_forward(self, blocks=1, speed=0.5, quiet=False):
+    def move_forward(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         self.move(period, speed, quiet=True)
 
-    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
+    def move_backwards(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         self.move(period, speed*-1, quiet=True)
@@ -264,22 +227,17 @@ class BluPants(BeagleBoneBlue):
 
 
 class BluPantsCar(BluPants):
-    def __init__(self, config={}, config_file=""):
-        super().__init__(config, config_file)
+    def __init__(self):
+        super().__init__()
         self.servo_horizontal = 1
+        self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
         self.servo_vertical = 2
+        self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
         self.camera_pos = 0
         self.camera_toggle_positions = [
             [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
             [89.0, -30.0], [89.0, 0], [0, 0]
         ]
-
-        if "blupants" in self.config:
-            if "camera" in self.config["blupants"]:
-                if "servo_horizontal" in self.config["blupants"]["camera"]:
-                    self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
-                if "servo_vertical" in self.config["blupants"]["camera"]:
-                    self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
 
     def camera_toggle(self, quiet=False):
         self.print_stdout("camera_toggle()", quiet)
@@ -324,34 +282,26 @@ class BluPantsCar(BluPants):
 
 
 class EduMIP(BluPants):
-    def __init__(self, config={}, config_file=""):
-        super().__init__(config, config_file)
+    def __init__(self):
+        super().__init__()
+
         self.block_length = 0.28
+        self.block_length = self.config["EduMIP"]["block_length"]
         self.turn_coefficient = 0.0175
+        self.turn_coefficient = self.config["EduMIP"]["turn_coefficient"]
         self.meter_coefficient = 14
+        self.meter_coefficient = self.config["EduMIP"]["meter_coefficient"]
         self.servo_shoulder_left = 7
+        self.servo_shoulder_left = self.config["EduMIP"]["servo_shoulder_left"]
         self.servo_shoulder_right = 6
+        self.servo_shoulder_right = self.config["EduMIP"]["servo_shoulder_right"]
         self.servo_claw_angle_open = 45.0
+        self.servo_claw_angle_open = self.config["EduMIP"]["claw"]["angle_open"]
         self.servo_claw_angle_close = 30.0
+        self.servo_claw_angle_close = self.config["EduMIP"]["claw"]["angle_close"]
         self.var_dir = "/tmp/blupants/"
         print("Make sure you have eduMPI balanced before running this script.")
         print("#rc_balance_dstr -i dstr")
-        if "EduMIP" in self.config:
-            if "block_length" in self.config["EduMIP"]:
-                self.block_length = self.config["EduMIP"]["block_length"]
-            if "turn_coefficient" in self.config["EduMIP"]:
-                self.turn_coefficient = self.config["EduMIP"]["turn_coefficient"]
-            if "meter_coefficient" in self.config["EduMIP"]:
-                self.meter_coefficient = self.config["EduMIP"]["meter_coefficient"]
-            if "servo_shoulder_left" in self.config["EduMIP"]:
-                self.servo_shoulder_left = self.config["EduMIP"]["servo_shoulder_left"]
-            if "servo_shoulder_right" in self.config["EduMIP"]:
-                self.servo_shoulder_right = self.config["EduMIP"]["servo_shoulder_right"]
-            if "claw" in self.config["EduMIP"]:
-                if "angle_open" in self.config["EduMIP"]["claw"]:
-                    self.servo_claw_angle_open = self.config["EduMIP"]["claw"]["angle_open"]
-                if "angle_close" in self.config["EduMIP"]["claw"]:
-                    self.servo_claw_angle_close = self.config["EduMIP"]["claw"]["angle_close"]
 
     def _create_cmd_file(self, cmd):
         file_path = os.path.join(self.var_dir, cmd)
@@ -368,11 +318,15 @@ class EduMIP(BluPants):
         self._create_cmd_file("break.txt.")
         self.sleep(2, quiet=True)
 
-    def move_forward(self, blocks=1, speed=0.5, quiet=False):
+    def move_forward(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_forward(blocks={})".format(blocks), quiet)
         self.move(self.block_length*blocks, quiet=True)
 
-    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
+    def move_backwards(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_backwards(blocks={})".format(blocks), quiet)
         self.move(self.block_length*blocks*-1, quiet=True)
 

@@ -12,10 +12,6 @@ except:
     import blupants.robots_common as robots_common
 
 
-global default_config
-default_config = robots_common.default_config
-
-
 class EV3(robots_common.RobotHollow):
     def __init__(self, config={}, config_file=""):
         super().__init__()
@@ -25,7 +21,7 @@ class EV3(robots_common.RobotHollow):
         self.name = "EV3BluPants"
         self.tts_all_commands = False
         self.period = 0.02
-        self._load_config()
+        self.duty = self.config["duty"]
 
         self.motors = []
         try:
@@ -80,20 +76,6 @@ class EV3(robots_common.RobotHollow):
             pass
 
         self.running = True
-
-    def _load_config(self):
-        if len(self.config_file) and os.path.isfile(self.config_file):
-            with open(self.config_file, "r") as f:
-                json.load(self.config, f)
-        for key in default_config:
-            if key not in self.config:
-                self.config[key] = default_config[key]
-        if "name" in self.config:
-            self.name = self.config.get("name")
-        if "tts_all_commands" in self.config:
-            self.tts_all_commands = self.config["tts_all_commands"]
-        if "period" in self.config:
-            self.period = self.config["period"]
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -184,33 +166,6 @@ class Gripp3r(EV3):
         super().__init__(config, config_file)
         self.name = "gripper"
 
-    def _load_config(self):
-        super()._load_config()
-        if "blupants" in self.config:
-            if "motor" in self.config["blupants"]:
-                if "duty_ratio" in self.config["blupants"]["motor"]:
-                    self.duty_ratio = self.config["blupants"]["motor"]["duty_ratio"]
-                if "turn_right_period" in self.config["blupants"]["motor"]:
-                    self.turn_right_period = self.config["blupants"]["motor"]["turn_right_period"]
-                if "turn_left_period" in self.config["blupants"]["motor"]:
-                    self.turn_left_period = self.config["blupants"]["motor"]["turn_left_period"]
-                if "position" in self.config["blupants"]["motor"]:
-                    if "front_left" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_front_left = self.config["blupants"]["motor"]["position"]["front_left"]
-                    if "front_right" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_front_right = self.config["blupants"]["motor"]["position"]["front_right"]
-                    if "back_left" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_back_left = self.config["blupants"]["motor"]["position"]["back_left"]
-                    if "back_right" in self.config["blupants"]["motor"]["position"]:
-                        self.motor_back_right = self.config["blupants"]["motor"]["position"]["back_right"]
-            if "claw" in self.config["blupants"]:
-                if "servo" in self.config["blupants"]["claw"]:
-                    self.servo_claw = self.config["blupants"]["claw"]["servo"]
-                if "angle_open" in self.config["blupants"]["claw"]:
-                    self.servo_claw_angle_open = self.config["blupants"]["claw"]["angle_open"]
-                if "angle_close" in self.config["blupants"]["claw"]:
-                    self.servo_claw_angle_close = self.config["blupants"]["claw"]["angle_close"]
-
     def claw_toggle(self, quiet=False):
         if self.grab:
             self.claw_close(quiet)
@@ -251,7 +206,9 @@ class Gripp3r(EV3):
             except:
                 pass
 
-    def move_forward(self, blocks=1, speed=0.5, quiet=False):
+    def move_forward(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         block_message = "blocks"
         if -2 < blocks < 2:
@@ -261,7 +218,9 @@ class Gripp3r(EV3):
         period = blocks/speed
         self.move(period, speed, quiet=True)
 
-    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
+    def move_backwards(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         block_message = "blocks"
         if blocks > -2 and blocks < 2:

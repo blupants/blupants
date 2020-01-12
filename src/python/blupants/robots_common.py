@@ -1,68 +1,13 @@
 import os
 import json
 
-global default_config
-default_config =\
-    {
-        "robot_id": 0,
-        "name": "BluPants",
-        "use_opencv": False,
-        "measurement_system": "m",
-        "step_distance": 0.3,
-        "period": 0.02,
-        "tts_all_commands": False,
-        "blupants":
-            {
-                "claw":
-                    {
-                        "servo": 8,
-                        "angle_open": -45.0,
-                        "angle_close": 45.0
-                    },
-                "hcsr04":
-                    {
-                        "echo": "P9_23",
-                        "trigger": "GPIO1_25",
-                        "vcc": "GP0_3v3",
-                        "gnd": "GP0_GND"
-                    },
-                "motor":
-                    {
-                        "position":
-                            {
-                                "front_left": 1,
-                                "front_right": 2,
-                                "back_left": 3,
-                                "back_right": 4
-                            },
-                        "duty_ratio": [1.0, 1.0, 1.0, 1.0],
-                        "turn_right_period": 0.005,
-                        "turn_left_period": 0.005
-                    },
-                "camera":
-                    {
-                        "servo_horizontal": 1,
-                        "servo_vertical": 2
-                    }
-            },
-        "EduMIP":
-            {
-                "block_length": 0.28,
-                "turn_coefficient": 0.0175,
-                "meter_coefficient": 14,
-                "servo_shoulder_left": 7,
-                "servo_shoulder_right": 6,
-                "claw":
-                    {
-                        "angle_open": 45.0,
-                        "angle_close": 30.0
-                    },
-            }
-}
-
-
 global config_file
 config_file = "/root/blupants.json"
+if not os.path.isfile(config_file):
+    config_file = "/etc/blupants.json"
+    if not os.path.isfile(config_file):
+        install_path = os.path.dirname(os.path.abspath(__file__))
+        config_file = install_path + "/blupants.json"
 
 
 if os.path.isfile(config_file):
@@ -72,6 +17,54 @@ if os.path.isfile(config_file):
             print(default_config)
         except:
             pass
+
+
+class RobotConfig:
+    _default_config = {}
+    config = {}
+
+    def __init__(self):
+        install_path = os.path.dirname(os.path.abspath(__file__))
+        default_config_file = install_path + "/blupants.json"
+        if os.path.isfile(default_config_file):
+            with open(default_config_file) as f:
+                try:
+                    self._default_config = json.load(f)
+                except Exception as e:
+                    print(e.message)
+
+        if os.path.isfile(config_file):
+            with open(config_file) as f:
+                try:
+                    self.config = json.load(f)
+                except:
+                    pass
+
+        for key in self._default_config:
+            obj0 = self._default_config[key]
+            if key not in self.config:
+                self.config[key] = obj0
+            if isinstance(obj0, dict):
+                for key1 in obj0:
+                    obj1 = obj0[key1]
+                    if key1 not in self.config[key]:
+                        self.config[key][key1] = obj1
+                    if isinstance(obj1, dict):
+                        for key2 in obj1:
+                            obj2 = obj1[key2]
+                            if key2 not in self.config[key][key1]:
+                                self.config[key][key1][key2] = obj2
+                            if isinstance(obj2, dict):
+                                for key3 in obj2:
+                                    obj3 = obj2[key3]
+                                    if key3 not in self.config[key][key1][key2]:
+                                        self.config[key][key1][key2][key3] = obj3
+                                    if isinstance(obj3, dict):
+                                        for key4 in obj3:
+                                            obj4 = obj3[key4]
+                                            if key4 not in self.config[key][key1][key2][key3]:
+                                                self.config[key][key1][key2][key3][key4] = obj4
+
 
 class StudioConsole:
     # Singleton instance.
@@ -133,6 +126,9 @@ def get_stdout():
 
 
 class RobotHollow:
+    _robot_config_obj = RobotConfig()
+    config = _robot_config_obj.config
+
     def __init__(self):
         self.standard_output = StudioConsole()
 
@@ -183,7 +179,7 @@ class RobotHollow:
         self._warning("read_distance")
         return -10
 
-    def move_forward(self, blocks=1, speed=0.5):
+    def move_forward(self, blocks=1, speed=-1):
         self._warning("move_forward")
         pass
 

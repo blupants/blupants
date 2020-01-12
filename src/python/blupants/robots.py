@@ -38,7 +38,7 @@ class Robot(robots_common.RobotHollow):
     def read_distance(self):
         return self._robot.read_distance()
 
-    def move_forward(self, blocks=1, speed=0.5):
+    def move_forward(self, blocks=1, speed=-1):
         return self._robot.move_forward(blocks, speed)
 
     def move_backwards(self, blocks=1, speed=0.5):

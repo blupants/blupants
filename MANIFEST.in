@@ -1,1 +1,2 @@
 include src/python/blupants/templates/*
+include src/python/blupants/blupants.json

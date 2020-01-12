@@ -14,10 +14,6 @@ except:
     import blupants.robots_common as robots_common
 
 
-global default_config
-default_config = robots_common.default_config
-
-
 class RaspberryPi(robots_common.RobotHollow):
     def __init__(self, config={}, config_file=""):
         super().__init__()
@@ -25,11 +21,10 @@ class RaspberryPi(robots_common.RobotHollow):
         self.config = config
         self.config_file = config_file
         self.name = "RaspberryPi"
-        self.duty = 0.5
+        self.duty = self.config["duty"]
         self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
         self.turn_right_period = 0.005
         self.turn_left_period = 0.005
-        self._load_config()
         period = 0.02
         if "period" in self.config:
             period = self.config["period"]
@@ -40,12 +35,8 @@ class RaspberryPi(robots_common.RobotHollow):
             [89.0, -30.0], [89.0, 0], [0, 0]
         ]
 
-        if "blupants" in self.config:
-            if "camera" in self.config["blupants"]:
-                if "servo_horizontal" in self.config["blupants"]["camera"]:
-                    self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
-                if "servo_vertical" in self.config["blupants"]["camera"]:
-                    self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
+        self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
+        self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
 
         self.grab = True
         self.servo_claw = 1
@@ -78,16 +69,6 @@ class RaspberryPi(robots_common.RobotHollow):
         self.hcsr04 = DistanceSensor(echo=GPIO_ECHO, trigger=GPIO_TRIGGER)
 
         self.running = True
-
-    def _load_config(self):
-        if len(self.config_file) and os.path.isfile(self.config_file):
-            with open(self.config_file, "r") as f:
-                json.load(self.config, f)
-        for key in default_config:
-            if key not in self.config:
-                self.config[key] = default_config[key]
-        if "name" in self.config:
-            self.name = self.config.get("name")
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -153,7 +134,9 @@ class RaspberryPi(robots_common.RobotHollow):
             self.print_stdout("Distance: [{}] cm.".format(str(distance)), quiet)
         return distance
 
-    def move_forward(self, blocks=1, speed=0.5, quiet=False):
+    def move_forward(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         for motor in self.motors:
@@ -162,7 +145,9 @@ class RaspberryPi(robots_common.RobotHollow):
         for motor in self.motors:
             motor.stop()
 
-    def move_backwards(self, blocks=1, speed=0.5, quiet=False):
+    def move_backwards(self, blocks=1, speed=-1, quiet=False):
+        if speed < 0:
+            speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
         for motor in self.motors:

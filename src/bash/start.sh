@@ -1,6 +1,8 @@
 #!/bin/sh
 echo "Robot init script..."
 
+INSTALL_PATH="/usr/local/lib/python3.5/dist-packages/blupants/"
+
 if ls /boot/uEnv.txt  1> /dev/null 2>&1; then
   # Only run LED test for hardware that supports it (e.g. BeagleBone)
   /usr/bin/rc_test_leds
@@ -14,6 +16,9 @@ chmod 777 /tmp/blupants/blupants_rpc.py
 mkdir -p /var/lib/cloud9/BluPants
 ln -s /tmp/blupants/blupants_rpc.py /var/lib/cloud9/BluPants/blupants_rpc.py
 
+if ls /etc/blupants.json  1> /dev/null 2>&1; then
+  cp $INSTALL_PATH/blupants.json /etc/blupants.json
+fi
 
 if ls /dev/video* 1> /dev/null 2>&1; then
   if ls /boot/uEnv.txt  1> /dev/null 2>&1; then
@@ -40,6 +45,6 @@ if ls /boot/uEnv.txt  1> /dev/null 2>&1; then
 fi
 
 echo "Ready to start blupants_client!"
-python3 /usr/local/lib/python3.5/dist-packages/blupants/blupants_client.py
+python3 $INSTALL_PATH/blupants_client.py
 
 echo "BluPants running..."
