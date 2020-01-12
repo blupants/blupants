@@ -15,46 +15,53 @@ except:
 
 
 class RaspberryPi(robots_common.RobotHollow):
-    def __init__(self, config={}, config_file=""):
+    def __init__(self):
         super().__init__()
         self.running = False
-        self.config = config
-        self.config_file = config_file
         self.name = "RaspberryPi"
         self.duty = self.config["duty"]
-        self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
+        self.duty_ratio = self.duty_ratio = self.config["raspberrypi"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.005
         self.turn_left_period = 0.005
-        period = 0.02
-        if "period" in self.config:
-            period = self.config["period"]
+        self.turn_right_period = self.config["raspberrypi"]["motor"]["turn_right_period"]
+        self.turn_left_period = self.config["raspberrypi"]["motor"]["turn_left_period"]
 
-        self.camera_pos = 0
-        self.camera_toggle_positions = [
-            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
-            [89.0, -30.0], [89.0, 0], [0, 0]
-        ]
-
-        self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
-        self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
+        self.servo_horizontal = self.config["raspberrypi"]["camera"]["servo_horizontal"]
+        self.servo_vertical = self.config["raspberrypi"]["camera"]["servo_vertical"]
 
         self.grab = True
         self.servo_claw = 1
         self.servo_claw_angle_open = -60
         self.servo_claw_angle_close = 60
 
+        self.servo_claw = self.config["raspberrypi"]["claw"]["servo"]
+        self.servo_claw_angle_open = self.config["raspberrypi"]["claw"]["angle_open"]
+        self.servo_claw_angle_close = self.config["raspberrypi"]["claw"]["angle_close"]
+
         self.servo_horizontal = 2
         self.servo_vertical = 3
+
+        self.servo_horizontal = self.config["raspberrypi"]["camera"]["servo_horizontal"]
+        self.servo_vertical = self.config["raspberrypi"]["camera"]["servo_horizontal"]
 
         self.IN1 = 7
         self.IN2 = 8
         self.IN3 = 9
         self.IN4 = 10
 
-        GPIO_SERVOS = [17, 27, 22]
+        self.IN1 = self.config["raspberrypi"]["motor"]["pinout"]["EN1"]
+        self.IN2 = self.config["raspberrypi"]["motor"]["pinout"]["EN2"]
+        self.IN3 = self.config["raspberrypi"]["motor"]["pinout"]["EN3"]
+        self.IN4 = self.config["raspberrypi"]["motor"]["pinout"]["EN4"]
 
-        GPIO_TRIGGER = 18
-        GPIO_ECHO = 24
+        self.servos = [17, 27, 22]
+        self.servos = self.config["raspberrypi"]["servos"]
+
+        self.trigger = 18
+        self.echo = 24
+
+        self.trigger = self.config["raspberrypi"]["hcsr04"]["trigger"]
+        self.echo = self.config["raspberrypi"]["hcsr04"]["echo"]
 
         motor_left = (self.IN1, self.IN2)
         motor_right = (self.IN3, self.IN4)
@@ -63,10 +70,10 @@ class RaspberryPi(robots_common.RobotHollow):
                        Motor(forward=motor_right[0], backward=motor_right[1])]
 
         self.pi_servos = []
-        for gpio_servo in GPIO_SERVOS:
+        for gpio_servo in self.servos:
             self.pi_servos.append(AngularServo(gpio_servo, min_angle=-90, max_angle=90))
 
-        self.hcsr04 = DistanceSensor(echo=GPIO_ECHO, trigger=GPIO_TRIGGER)
+        self.hcsr04 = DistanceSensor(echo=self.echo, trigger=self.trigger)
 
         self.running = True
 

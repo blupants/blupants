@@ -80,24 +80,24 @@ class BeagleBoneBlue(robots_common.RobotHollow):
 class BluPants(BeagleBoneBlue):
     def __init__(self):
         self.duty = self.config["duty"]
-        self.duty_ratio = self.config["blupants"]["motor"]["duty_ratio"]
-        self.turn_right_period = self.config["blupants"]["motor"]["turn_right_period"]
-        self.turn_left_period = self.config["blupants"]["motor"]["turn_left_period"]
-        self.motor_front_left = self.config["blupants"]["motor"]["position"]["front_left"]
-        self.motor_front_right = self.config["blupants"]["motor"]["position"]["front_right"]
-        self.motor_back_left = self.config["blupants"]["motor"]["position"]["back_left"]
-        self.motor_back_right = self.config["blupants"]["motor"]["position"]["back_right"]
+        self.duty_ratio = self.config["beagleboneblue"]["motor"]["duty_ratio"]
+        self.turn_right_period = self.config["beagleboneblue"]["motor"]["turn_right_period"]
+        self.turn_left_period = self.config["beagleboneblue"]["motor"]["turn_left_period"]
+        self.motor_front_left = self.config["beagleboneblue"]["motor"]["position"]["front_left"]
+        self.motor_front_right = self.config["beagleboneblue"]["motor"]["position"]["front_right"]
+        self.motor_back_left = self.config["beagleboneblue"]["motor"]["position"]["back_left"]
+        self.motor_back_right = self.config["beagleboneblue"]["motor"]["position"]["back_right"]
         self.grab = True
         self.echo = "P9_23"
-        self.echo = self.config["blupants"]["hcsr04"]["echo"]
+        self.echo = self.config["beagleboneblue"]["hcsr04"]["echo"]
         self.trigger = "GPIO1_25"
-        self.trigger = self.config["blupants"]["hcsr04"]["trigger"]
+        self.trigger = self.config["beagleboneblue"]["hcsr04"]["trigger"]
         self.servo_claw = 8
-        self.servo_claw = self.config["blupants"]["claw"]["servo"]
+        self.servo_claw = self.config["beagleboneblue"]["claw"]["servo"]
         self.servo_claw_angle_open = -45.0
-        self.servo_claw_angle_open = self.config["blupants"]["claw"]["angle_open"]
+        self.servo_claw_angle_open = self.config["beagleboneblue"]["claw"]["angle_open"]
         self.servo_claw_angle_close = 45.0
-        self.servo_claw_angle_close = self.config["blupants"]["claw"]["angle_close"]
+        self.servo_claw_angle_close = self.config["beagleboneblue"]["claw"]["angle_close"]
         super().__init__()
 
         # Boot
@@ -230,14 +230,10 @@ class BluPantsCar(BluPants):
     def __init__(self):
         super().__init__()
         self.servo_horizontal = 1
-        self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
+        self.servo_horizontal = self.config["beagleboneblue"]["camera"]["servo_horizontal"]
         self.servo_vertical = 2
-        self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
-        self.camera_pos = 0
-        self.camera_toggle_positions = [
-            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
-            [89.0, -30.0], [89.0, 0], [0, 0]
-        ]
+        self.servo_vertical = self.config["beagleboneblue"]["camera"]["servo_vertical"]
+
 
     def camera_toggle(self, quiet=False):
         self.print_stdout("camera_toggle()", quiet)

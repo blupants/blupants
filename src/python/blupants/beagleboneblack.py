@@ -18,40 +18,29 @@ default_config = robots_common.default_config
 
 
 class BeagleBoneBlack(robots_common.RobotHollow):
-    def __init__(self, config={}, config_file=""):
+    def __init__(self):
         super().__init__()
         self.running = False
-        self.config = config
-        self.config_file = config_file
-        self.name = "BeagleBoneBlack"
+        self.name = self.config["name"]
         self.duty = self.config["duty"]
-        self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
+        self.duty_ratio = self.config["beagleboneblack"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.03
+        self.turn_right_period = self.config["beagleboneblack"]["motor"]["turn_right_period"]
         self.turn_left_period = 0.03
-        period = 0.02
-        if "period" in self.config:
-            period = self.config["period"]
-
-        self.camera_pos = 0
-        self.camera_toggle_positions = [
-            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
-            [89.0, -30.0], [89.0, 0], [0, 0]
-        ]
-
-        if "blupants" in self.config:
-            if "camera" in self.config["blupants"]:
-                if "servo_horizontal" in self.config["blupants"]["camera"]:
-                    self.servo_horizontal = self.config["blupants"]["camera"]["servo_horizontal"]
-                if "servo_vertical" in self.config["blupants"]["camera"]:
-                    self.servo_vertical = self.config["blupants"]["camera"]["servo_vertical"]
+        self.turn_left_period = self.config["beagleboneblack"]["motor"]["turn_left_period"]
 
         self.grab = True
         self.servo_claw = 1
+        self.servo_claw = self.config["beagleboneblack"]["claw"]["servo"]
         self.servo_claw_angle_open = -90
+        self.servo_claw_angle_open = self.config["beagleboneblack"]["claw"]["angle_open"]
         self.servo_claw_angle_close = -30
+        self.servo_claw_angle_close = self.config["beagleboneblack"]["claw"]["angle_close"]
 
         self.servo_horizontal = 2
+        self.servo_horizontal = self.config["beagleboneblack"]["camera"]["servo_horizontal"]
         self.servo_vertical = 3
+        self.servo_vertical = self.config["beagleboneblack"]["camera"]["servo_vertical"]
 
         self.ENA = "P9_21"
         self.IN1 = "P9_23"
@@ -59,6 +48,13 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.IN3 = "P9_26"
         self.IN4 = "P9_24"
         self.ENB = "P9_22"
+
+        self.ENA = self.config["beagleboneblack"]["motor"]["pinout"]["ENA"]
+        self.IN1 = self.config["beagleboneblack"]["motor"]["pinout"]["EN1"]
+        self.IN2 = self.config["beagleboneblack"]["motor"]["pinout"]["EN2"]
+        self.IN3 = self.config["beagleboneblack"]["motor"]["pinout"]["EN3"]
+        self.IN4 = self.config["beagleboneblack"]["motor"]["pinout"]["EN4"]
+        self.ENB = self.config["beagleboneblack"]["motor"]["pinout"]["ENB"]
 
         PWM.start(self.ENA, 0, 1000)
         PWM.start(self.ENB, 0, 1000)
@@ -68,12 +64,16 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         GPIO.setup(self.IN4, GPIO.OUT)
 
         self.GPIO_SERVOS = ["P8_13", "P9_42", "P8_19"]
+        self.GPIO_SERVOS = self.config["beagleboneblack"]["servos"]
 
         for pin in self.GPIO_SERVOS:
             PWM.start(pin, 2, 50)
 
         self.trigger = "P8_12"
         self.echo = "P8_11"
+
+        self.trigger = self.config["beagleboneblack"]["hcsr04"]["trigger"]
+        self.echo = self.config["beagleboneblack"]["hcsr04"]["echo"]
 
         # Configuration
         GPIO.setup(self.trigger, GPIO.OUT)

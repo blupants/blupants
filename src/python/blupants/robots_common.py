@@ -65,6 +65,12 @@ class RobotConfig:
                                             if key4 not in self.config[key][key1][key2][key3]:
                                                 self.config[key][key1][key2][key3][key4] = obj4
 
+        self.camera_pos = 0
+        self.camera_toggle_positions = [
+            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
+            [89.0, -30.0], [89.0, 0], [0, 0]
+        ]
+
 
 class StudioConsole:
     # Singleton instance.

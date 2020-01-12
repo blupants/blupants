@@ -13,14 +13,12 @@ except:
 
 
 class EV3(robots_common.RobotHollow):
-    def __init__(self, config={}, config_file=""):
+    def __init__(self):
         super().__init__()
         self.running = False
-        self.config = config
-        self.config_file = config_file
-        self.name = "EV3BluPants"
-        self.tts_all_commands = False
-        self.period = 0.02
+        self.name = self.config["name"]
+        self.tts_all_commands = self.config["tts_all_commands"]
+        self.period = self.config["period"]
         self.duty = self.config["duty"]
 
         self.motors = []
@@ -150,21 +148,32 @@ class EV3(robots_common.RobotHollow):
 
 
 class Gripp3r(EV3):
-    def __init__(self, config={}, config_file=""):
-        self.duty = 0.5
-        self.duty_ratio = [1.0, 1.0, 1.0, 1.0]
+    def __init__(self):
+        self.duty_ratio = self.config["ev3"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.015
         self.turn_left_period = 0.015
         self.motor_front_left = 0
         self.motor_front_right = 1
         self.motor_back_left = 2
         self.motor_back_right = 3
+
+        self.turn_right_period = self.config["ev3"]["motor"]["turn_right_period"]
+        self.turn_left_period = self.config["ev3"]["motor"]["turn_left_period"]
+        self.motor_front_left = self.config["ev3"]["motor"]["position"]["front_left"]
+        self.motor_front_right = self.config["ev3"]["motor"]["position"]["front_right"]
+        self.motor_back_left = self.config["ev3"]["motor"]["position"]["back_left"]
+        self.motor_back_right = self.config["ev3"]["motor"]["position"]["back_right"]
+
         self.grab = True
         self.servo_claw = "a"
         self.servo_claw_angle_open = -560
         self.servo_claw_angle_close = 560
-        super().__init__(config, config_file)
-        self.name = "gripper"
+
+        self.servo_claw = self.config["ev3"]["claw"]["servo"]
+        self.servo_claw_angle_open = self.config["ev3"]["claw"]["angle_open"]
+        self.servo_claw_angle_close = self.config["ev3"]["claw"]["angle_close"]
+
+        super().__init__()
 
     def claw_toggle(self, quiet=False):
         if self.grab:

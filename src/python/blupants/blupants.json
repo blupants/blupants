@@ -7,7 +7,108 @@
   "step_distance": 0.3,
   "period": 0.02,
   "tts_all_commands": false,
-  "blupants":
+  "ev3":
+  {
+    "claw":
+    {
+      "servo": "a",
+      "angle_open":  -560,
+      "angle_close": 560
+    },
+    "motor":
+    {
+      "position":
+      {
+        "front_left": 0,
+        "front_right": 1,
+        "back_left": 2,
+        "back_right": 3
+      },
+      "duty_ratio": [1.0, 1.0, 1.0, 1.0],
+      "turn_right_period": 0.015,
+      "turn_left_period": 0.015
+    },
+    "camera":
+    {
+      "servo_horizontal": "b",
+      "servo_vertical": "c"
+    }
+  },
+  "raspberrypi":
+  {
+    "servos": [17, 27, 22],
+    "claw":
+    {
+      "servo": 1,
+      "angle_open": -60.0,
+      "angle_close": 60.0
+    },
+    "hcsr04":
+    {
+      "trigger": 18,
+      "echo": 24,
+      "vcc": "VDD_5V",
+      "gnd": "DGND"
+    },
+    "motor":
+    {
+      "pinout":
+      {
+        "ENA": "",
+        "IN1": 7,
+        "IN2": 8,
+        "IN3": 9,
+        "IN4": 10,
+        "ENB": ""
+      },
+      "duty_ratio": [1.0, 1.0, 1.0, 1.0],
+      "turn_right_period": 0.005,
+      "turn_left_period": 0.005
+    },
+    "camera":
+    {
+      "servo_horizontal": 2,
+      "servo_vertical": 3
+    }
+  },
+  "beagleboneblack":
+  {
+    "servos": ["P8_13", "P9_42", "P8_19"],
+    "claw":
+    {
+      "servo": 1,
+      "angle_open": -90.0,
+      "angle_close": -30.0
+    },
+    "hcsr04":
+    {
+      "trigger": "P8_12",
+      "echo": "P8_11",
+      "vcc": "VDD_5V",
+      "gnd": "DGND"
+    },
+    "motor":
+    {
+      "pinout":
+      {
+        "ENA": "P9_21",
+        "IN1": "P9_23",
+        "IN2": "P9_27",
+        "IN3": "P9_26",
+        "IN4": "P9_24",
+        "ENB": "P9_22"
+      },
+      "duty_ratio": [1.0, 1.0, 1.0, 1.0],
+      "turn_right_period": 0.03,
+      "turn_left_period": 0.03
+    },
+    "camera":
+    {
+      "servo_horizontal": 2,
+      "servo_vertical": 3
+    }
+  },
+  "beagleboneblue":
   {
     "claw":
     {
@@ -17,8 +118,8 @@
     },
     "hcsr04":
     {
-      "echo": "P9_23",
       "trigger": "GPIO1_25",
+      "echo": "P9_23",
       "vcc": "GP0_3v3",
       "gnd": "GP0_GND"
     },

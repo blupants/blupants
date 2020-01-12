@@ -26,28 +26,22 @@ global local_ip
 local_ip = "127.0.0.1"
 
 global robot_id
-robot_id = 0  # blupants_car
-# robot_id = 1  # mr_blupants / eduMIP
-# robot_id = 2  # gripper
+robot_id = 0
 
 global robot_name
 robot_name = ""
 
-
 global dynamic_code_file
 dynamic_code_file = "/tmp/blupants/blupants_rpc.py"
 
-
-global config_file
-config_file = "/root/blupants.json"
-
 global config
 config = {}
+config_obj = robots_common.RobotConfig()
 
-if os.path.isfile(config_file):
-    with open(config_file) as f:
-        config = json.load(f)
-        print(config)
+try:
+    config = config_obj.config
+except Exception as e:
+    print(e.message)
 
 if "robot_id" in config:
     robot_id = config["robot_id"]
