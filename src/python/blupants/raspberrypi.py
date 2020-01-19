@@ -42,7 +42,7 @@ class RaspberryPi(robots_common.RobotHollow):
         self.servo_vertical = 3
 
         self.servo_horizontal = self.config["raspberrypi"]["camera"]["servo_horizontal"]
-        self.servo_vertical = self.config["raspberrypi"]["camera"]["servo_horizontal"]
+        self.servo_vertical = self.config["raspberrypi"]["camera"]["servo_vertical"]
 
         self.IN1 = 7
         self.IN2 = 8
