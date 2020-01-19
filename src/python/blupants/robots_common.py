@@ -1,12 +1,14 @@
 import os
 import json
 
+global install_path
+install_path = os.path.dirname(os.path.abspath(__file__))
+
 global config_file
 config_file = "/root/blupants.json"
 if not os.path.isfile(config_file):
     config_file = "/etc/blupants.json"
     if not os.path.isfile(config_file):
-        install_path = os.path.dirname(os.path.abspath(__file__))
         config_file = install_path + "/blupants.json"
 
 
@@ -24,6 +26,16 @@ class RobotConfig:
     config = {}
 
     def __init__(self):
+        self.camera_pos = 0
+        self.camera_toggle_positions = [
+            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
+            [89.0, -30.0], [89.0, 0], [0, 0]
+        ]
+        self.camera_toggle_positions = []
+        self.reload()
+
+    def reload(self):
+        global install_path
         install_path = os.path.dirname(os.path.abspath(__file__))
         default_config_file = install_path + "/blupants.json"
         if os.path.isfile(default_config_file):
@@ -65,11 +77,7 @@ class RobotConfig:
                                             if key4 not in self.config[key][key1][key2][key3]:
                                                 self.config[key][key1][key2][key3][key4] = obj4
 
-        self.camera_pos = 0
-        self.camera_toggle_positions = [
-            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
-            [89.0, -30.0], [89.0, 0], [0, 0]
-        ]
+        print("Robot configuration reloaded")
 
 
 class StudioConsole:
@@ -137,6 +145,15 @@ class RobotHollow:
 
     def __init__(self):
         self.standard_output = StudioConsole()
+
+    def reload(self):
+        try:
+            self._robot_config_obj.reload()
+            new_config = self._robot_config_obj.config
+            if isinstance(new_config, dict):
+                self.config = new_config
+        except Exception as ex:
+            print("Unable to reload robot config: {}".format(str(ex.message)))
 
     def _warning(self, name=""):
         self.print_stdout("RobotHollow: Method {} not implemented!".format(name))
