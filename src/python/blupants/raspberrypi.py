@@ -146,8 +146,11 @@ class RaspberryPi(robots_common.RobotHollow):
             speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks/speed
+        motor_index = 0
         for motor in self.motors:
+            speed = speed * self.duty_ratio[motor_index]
             motor.forward(speed)
+            motor_index += 1
         self.sleep(period, quiet=True)
         for motor in self.motors:
             motor.stop()

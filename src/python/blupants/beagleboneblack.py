@@ -116,6 +116,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
     def set_motor(self, i=1, duty=0.5, quiet=False):
         self.print_stdout("set_motor(i={}, duty={})".format(i, duty), quiet)
         motor_index = i-1
+        duty = duty * self.duty_ratio[motor_index]
         enable = None
         if motor_index > 0:
             enable = self.ENB
