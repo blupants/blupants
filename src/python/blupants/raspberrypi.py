@@ -18,6 +18,13 @@ class RaspberryPi(robots_common.RobotHollow):
     def __init__(self):
         super().__init__()
         self.running = False
+        self.reload()
+        self.running = True
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
         self.name = "RaspberryPi"
         self.duty = self.config["duty"]
         self.duty_ratio = self.duty_ratio = self.config["raspberrypi"]["motor"]["duty_ratio"]
@@ -74,8 +81,6 @@ class RaspberryPi(robots_common.RobotHollow):
             self.pi_servos.append(AngularServo(gpio_servo, min_angle=-90, max_angle=90))
 
         self.hcsr04 = DistanceSensor(echo=self.echo, trigger=self.trigger)
-
-        self.running = True
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)

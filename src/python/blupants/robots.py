@@ -22,6 +22,8 @@ class RobotFactory:
 class Robot(robots_common.RobotHollow):
     def __init__(self, platform):
         self._robot = factory.get_robot(platform)
+
+    def reload(self):
         self._robot.reload()
 
     def print(self, message):

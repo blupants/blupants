@@ -16,10 +16,8 @@ class EV3(robots_common.RobotHollow):
     def __init__(self):
         super().__init__()
         self.running = False
-        self.name = self.config["name"]
-        self.tts_all_commands = self.config["tts_all_commands"]
-        self.period = self.config["period"]
-        self.duty = self.config["duty"]
+
+        self.reload()
 
         self.motors = []
         try:
@@ -74,6 +72,15 @@ class EV3(robots_common.RobotHollow):
             pass
 
         self.running = True
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
+        self.name = self.config["name"]
+        self.tts_all_commands = self.config["tts_all_commands"]
+        self.period = self.config["period"]
+        self.duty = self.config["duty"]
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -149,6 +156,14 @@ class EV3(robots_common.RobotHollow):
 
 class Gripp3r(EV3):
     def __init__(self):
+        super().__init__()
+        self.reload()
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
+
         self.duty_ratio = self.config["ev3"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.015
         self.turn_left_period = 0.015
@@ -173,7 +188,6 @@ class Gripp3r(EV3):
         self.servo_claw_angle_open = self.config["ev3"]["claw"]["angle_open"]
         self.servo_claw_angle_close = self.config["ev3"]["claw"]["angle_close"]
 
-        super().__init__()
 
     def claw_toggle(self, quiet=False):
         if self.grab:

@@ -21,6 +21,15 @@ class BeagleBoneBlack(robots_common.RobotHollow):
     def __init__(self):
         super().__init__()
         self.running = False
+        self.reload()
+        self.look_angle(90)
+        self.claw_open()
+        self.running = True
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
         self.name = self.config["name"]
         self.duty = self.config["duty"]
         self.duty_ratio = self.config["beagleboneblack"]["motor"]["duty_ratio"]
@@ -82,11 +91,6 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         # Security
         GPIO.output(self.trigger, False)
         time.sleep(0.5)
-
-        self.running = True
-
-        self.look_angle(90)
-        self.claw_open()
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)

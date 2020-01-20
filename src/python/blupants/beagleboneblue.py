@@ -21,6 +21,13 @@ class BeagleBoneBlue(robots_common.RobotHollow):
     def __init__(self):
         super().__init__()
         self.running = False
+        self.reload()
+        self.running = True
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
         self.name = self.config["name"]
         self.period = self.config["period"]
         period = self.period
@@ -43,7 +50,6 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         # start clock
         for i in range(0, 8):
             self.clcks[i].start()
-        self.running = True
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -79,6 +85,13 @@ class BeagleBoneBlue(robots_common.RobotHollow):
 
 class BluPants(BeagleBoneBlue):
     def __init__(self):
+        super().__init__()
+        self.reload()
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
         self.duty = self.config["duty"]
         self.duty_ratio = self.config["beagleboneblue"]["motor"]["duty_ratio"]
         self.turn_right_period = self.config["beagleboneblue"]["motor"]["turn_right_period"]
@@ -98,7 +111,6 @@ class BluPants(BeagleBoneBlue):
         self.servo_claw_angle_open = self.config["beagleboneblue"]["claw"]["angle_open"]
         self.servo_claw_angle_close = 45.0
         self.servo_claw_angle_close = self.config["beagleboneblue"]["claw"]["angle_close"]
-        super().__init__()
 
         # Boot
         # Configuration
@@ -229,11 +241,16 @@ class BluPants(BeagleBoneBlue):
 class BluPantsCar(BluPants):
     def __init__(self):
         super().__init__()
+        self.reload()
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
         self.servo_horizontal = 1
         self.servo_horizontal = self.config["beagleboneblue"]["camera"]["servo_horizontal"]
         self.servo_vertical = 2
         self.servo_vertical = self.config["beagleboneblue"]["camera"]["servo_vertical"]
-
 
     def camera_toggle(self, quiet=False):
         self.print_stdout("camera_toggle()", quiet)
@@ -280,6 +297,12 @@ class BluPantsCar(BluPants):
 class EduMIP(BluPants):
     def __init__(self):
         super().__init__()
+        self.reload()
+
+    def reload(self):
+        super().reload()
+        if self.running:
+            self.shutdown(quiet=False)
 
         self.block_length = 0.28
         self.block_length = self.config["EduMIP"]["block_length"]
