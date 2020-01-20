@@ -75,8 +75,6 @@ class EV3(robots_common.RobotHollow):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
         self.name = self.config["name"]
         self.tts_all_commands = self.config["tts_all_commands"]
         self.period = self.config["period"]
@@ -161,8 +159,6 @@ class Gripp3r(EV3):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
 
         self.duty_ratio = self.config["ev3"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.015

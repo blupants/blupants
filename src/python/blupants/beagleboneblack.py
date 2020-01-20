@@ -28,8 +28,6 @@ class BeagleBoneBlack(robots_common.RobotHollow):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
         self.name = self.config["name"]
         self.duty = self.config["duty"]
         self.duty_ratio = self.config["beagleboneblack"]["motor"]["duty_ratio"]

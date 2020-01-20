@@ -23,8 +23,7 @@ class RaspberryPi(robots_common.RobotHollow):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
+
         self.name = "RaspberryPi"
         self.duty = self.config["duty"]
         self.duty_ratio = self.duty_ratio = self.config["raspberrypi"]["motor"]["duty_ratio"]

@@ -22,16 +22,7 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         super().__init__()
         self.running = False
         self.reload()
-        self.running = True
-
-    def reload(self):
-        super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
-        self.name = self.config["name"]
-        self.period = self.config["period"]
         period = self.period
-
         self.bbb_servos = [servo.Servo(1), servo.Servo(2), servo.Servo(3), servo.Servo(4), servo.Servo(5),
                            servo.Servo(6), servo.Servo(7), servo.Servo(8)]
 
@@ -50,6 +41,12 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         # start clock
         for i in range(0, 8):
             self.clcks[i].start()
+        self.running = True
+
+    def reload(self):
+        super().reload()
+        self.name = self.config["name"]
+        self.period = self.config["period"]
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -90,8 +87,6 @@ class BluPants(BeagleBoneBlue):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
         self.duty = self.config["duty"]
         self.duty_ratio = self.config["beagleboneblue"]["motor"]["duty_ratio"]
         self.turn_right_period = self.config["beagleboneblue"]["motor"]["turn_right_period"]
@@ -245,8 +240,6 @@ class BluPantsCar(BluPants):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
         self.servo_horizontal = 1
         self.servo_horizontal = self.config["beagleboneblue"]["camera"]["servo_horizontal"]
         self.servo_vertical = 2
@@ -301,8 +294,6 @@ class EduMIP(BluPants):
 
     def reload(self):
         super().reload()
-        if self.running:
-            self.shutdown(quiet=False)
 
         self.block_length = 0.28
         self.block_length = self.config["EduMIP"]["block_length"]
