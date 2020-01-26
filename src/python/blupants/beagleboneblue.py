@@ -88,6 +88,7 @@ class BluPants(BeagleBoneBlue):
     def reload(self):
         super().reload()
         self.duty = self.config["duty"]
+        self.block_length = self.config["block_length"]
         self.duty_ratio = self.config["beagleboneblue"]["motor"]["duty_ratio"]
         self.turn_right_period = self.config["beagleboneblue"]["motor"]["turn_right_period"]
         self.turn_left_period = self.config["beagleboneblue"]["motor"]["turn_left_period"]
@@ -184,14 +185,14 @@ class BluPants(BeagleBoneBlue):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         self.move(period, speed, quiet=True)
 
     def move_backwards(self, blocks=1, speed=-1, quiet=False):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         self.move(period, speed*-1, quiet=True)
 
     def turn_right(self, angle=90, quiet=False):
@@ -332,13 +333,13 @@ class EduMIP(BluPants):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_forward(blocks={})".format(blocks), quiet)
-        self.move(self.block_length*blocks, quiet=True)
+        self.move(self.block_length*blocks*self.block_length, quiet=True)
 
     def move_backwards(self, blocks=1, speed=-1, quiet=False):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_backwards(blocks={})".format(blocks), quiet)
-        self.move(self.block_length*blocks*-1, quiet=True)
+        self.move(self.block_length*blocks*-1*self.block_length, quiet=True)
 
     def turn_left(self, angle=90.0, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)

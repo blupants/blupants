@@ -4,7 +4,7 @@
   "use_opencv": false,
   "measurement_system": "m",
   "duty": 0.5,
-  "step_distance": 0.3,
+  "block_length": 0.5,
   "period": 0.02,
   "tts_all_commands": false,
   "ev3":

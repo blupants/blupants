@@ -79,6 +79,7 @@ class EV3(robots_common.RobotHollow):
         self.tts_all_commands = self.config["tts_all_commands"]
         self.period = self.config["period"]
         self.duty = self.config["duty"]
+        self.block_length = self.config["block_length"]
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -235,7 +236,7 @@ class Gripp3r(EV3):
             block_message = "block"
         if self.tts_all_commands:
             self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         self.move(period, speed, quiet=True)
 
     def move_backwards(self, blocks=1, speed=-1, quiet=False):
@@ -247,7 +248,7 @@ class Gripp3r(EV3):
             block_message = "block"
         if self.tts_all_commands:
             self.say("Moving {} {} backwards.".format(blocks, block_message), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         self.move(period, speed*-1, quiet=True)
 
     def turn_right(self, angle=90, quiet=False):

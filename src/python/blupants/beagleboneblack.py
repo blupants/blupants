@@ -30,6 +30,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         super().reload()
         self.name = self.config["name"]
         self.duty = self.config["duty"]
+        self.block_length = self.config["block_length"]
         self.duty_ratio = self.config["beagleboneblack"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.03
         self.turn_right_period = self.config["beagleboneblack"]["motor"]["turn_right_period"]
@@ -205,7 +206,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         speed *= 100
         self.set_motor(1, speed, quiet=True)
         self.set_motor(2, speed, quiet=True)
@@ -216,7 +217,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         speed *= 100
         self.set_motor(1, speed * -1, quiet=True)
         self.set_motor(2, speed * -1, quiet=True)

@@ -26,6 +26,7 @@ class RaspberryPi(robots_common.RobotHollow):
 
         self.name = "RaspberryPi"
         self.duty = self.config["duty"]
+        self.block_length = self.config["block_length"]
         self.duty_ratio = self.duty_ratio = self.config["raspberrypi"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.005
         self.turn_left_period = 0.005
@@ -149,7 +150,7 @@ class RaspberryPi(robots_common.RobotHollow):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         motor_index = 0
         for motor in self.motors:
             speed = speed * self.duty_ratio[motor_index]
@@ -163,7 +164,7 @@ class RaspberryPi(robots_common.RobotHollow):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
-        period = blocks/speed
+        period = blocks * self.block_length / speed
         for motor in self.motors:
             motor.backward(speed)
         self.sleep(period, quiet=True)
