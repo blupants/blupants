@@ -82,7 +82,7 @@ def _reset_rpc_module():
     pass
 
 
-def _exec_rpc_code(code="", version=1, quiet=False):
+def exec_rpc_code(code="", version=1, quiet=False):
     print("Executing code for robot: [{}]".format(robot_name))
     python_code = _create_rpc_content(code, version, quiet)
     print(python_code)
@@ -111,7 +111,7 @@ def execute_python_code(py, version=1):
             return
 
     if version >= 1:
-        _exec_rpc_code(py, version)
+        exec_rpc_code(py, version)
         return
 
 
@@ -152,6 +152,7 @@ def get_code():
 def shutdown():
     global running
     running = False
+    os.system("touch /tmp/blupants/shutdown")
     _reset_rpc_module()
 
 
@@ -163,7 +164,7 @@ def run():
     dyn_code = "robot.claw_toggle()\n"
     dyn_code += "robot.say_welcome()\n"
     dyn_code += "robot.claw_toggle()\n"
-    _exec_rpc_code(dyn_code, 1, True)
+    exec_rpc_code(dyn_code, 1, True)
     _reset_rpc_module()
 
     while running:

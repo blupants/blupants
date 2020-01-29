@@ -3,45 +3,74 @@
 from flask import Flask, Response
 import time
 import os
-import json
 
+try:
+    import blupants_client
+except:
+    import blupants.blupants_client as blupants_client
+
+
+global robot_id
+robot_id = 0
+
+if "robot_id" in blupants_client.config:
+    robot_id = blupants_client.config["robot_id"]
+
+global use_opencv
 use_opencv = False
+
+if "use_opencv" in blupants_client.config:
+    use_opencv = blupants_client.config["use_opencv"]
+
 img_path = "/tmp/blupants/t.png"
 shutdown_file = "/tmp/blupants/shutdown"
 
-global config_file
-config_file = "/root/blupants.json"
-global config
-config = {}
-
-if os.path.isfile(config_file):
-    with open(config_file) as f:
-        config = json.load(f)
-        print(config)
-
-if "use_opencv" in config:
-    use_opencv = config["use_opencv"]
 
 app = Flask(__name__)
 
 
 def gen():
     import cv2
-    video = cv2.VideoCapture(0)
-    if video.isOpened():
-        video.set(cv2.CAP_PROP_FPS, 1)
-        video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        video.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        time.sleep(1)
-    """Video streaming generator function."""
-    while True:
-        rval, frame = video.read()
-        cv2.imwrite(img_path, frame)
-        yield b'--frame\r\nContent-Type: image/png\r\n\r\n' + open(img_path, 'rb').read() + b'\r\n'
-        time.sleep(0.5)
-        if os.path.isfile(shutdown_file):
-            break
-    video.release()
+
+    if robot_id == 4:
+        import imutils
+        from picamera.array import PiRGBArray
+        from picamera import PiCamera
+
+        camera = PiCamera()
+        camera.resolution = (320, 240)
+        camera.framerate = 32
+        rawCapture = PiRGBArray(camera, size=(320, 240))
+        """Video streaming generator function."""
+        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+            # grab the raw NumPy array representing the image, then initialize the t
+            image = frame.array
+            image = imutils.rotate_bound(image, 180)
+            cv2.imwrite(img_path, image)
+            yield b'--frame\r\nContent-Type: image/png\r\n\r\n' + open(img_path, 'rb').read() + b'\r\n'
+            time.sleep(0.3)
+            rawCapture.truncate(0)
+            time.sleep(0.3)
+            if os.path.isfile(shutdown_file):
+                break
+
+    if robot_id == 0 or robot_id == 1:
+        video = cv2.VideoCapture(0)
+        if video.isOpened():
+            video.set(cv2.CAP_PROP_FPS, 1)
+            video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+            video.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+            time.sleep(1)
+        """Video streaming generator function."""
+        while True:
+            rval, frame = video.read()
+            cv2.imwrite(img_path, frame)
+            yield b'--frame\r\nContent-Type: image/png\r\n\r\n' + open(img_path, 'rb').read() + b'\r\n'
+            time.sleep(0.5)
+            if os.path.isfile(shutdown_file):
+                break
+        video.release()
+
     print("Finished streaming.")
     cmd = "rm {}".format(shutdown_file)
     os.system(cmd)

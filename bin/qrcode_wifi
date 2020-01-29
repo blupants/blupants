@@ -4,21 +4,89 @@ import os
 import time
 import cv2
 import requests
-import rcpy
-import rcpy.servo as servo
-import rcpy.clock as clock
+
+try:
+    import blupants_client
+except:
+    import blupants.blupants_client as blupants_client
+
+
+global robot_id
+robot_id = 0
+
+if "robot_id" in blupants_client.config:
+    robot_id = blupants_client.config["robot_id"]
+
+
+global pos_begin
+global pos_end
+global step_h
+global step_v
+global pos_v
+global pos_h
+
+
+pos_begin = -20
+pos_end = 25
+step_h = step_v = 5
+pos_v = 0
+pos_h = pos_begin
+
+
+def pan_tilt(ang_h=0, ang_v=0):
+    global robot_id
+
+    ang_h = round(ang_h, 2)
+    ang_v = round(ang_v, 2)
+    print("Servo position: V:[{}] H:[{}]".format(ang_v, ang_h))
+
+    robot_type = "beagleboneblue"
+    if robot_id == 4:
+        robot_type = "raspberrypi"
+
+    servo_h = blupants_client.config[robot_type]["camera"]["servo_horizontal"]
+    servo_v = blupants_client.config[robot_type]["camera"]["servo_vertical"]
+
+    dyn_code = "robot.set_servo({}, {})\n".format(servo_h, ang_h)
+    dyn_code += "robot.set_servo({}, {})\n".format(servo_v, ang_v)
+    blupants_client.exec_rpc_code(dyn_code, 1, True)
+
+
+def move_camera(ret):
+    global pos_begin
+    global pos_end
+    global step_h
+    global step_v
+    global pos_v
+    global pos_h
+
+    pan_tilt(pos_h, pos_v)
+
+    if ret:
+        # Servo sweep
+        if pos_begin > pos_h or pos_h > pos_end:
+            step_h *= -1
+            pos_h += step_h
+            pos_v += step_v
+            if pos_begin > pos_v or pos_v > pos_end:
+                step_v *= -1
+                pos_v += step_v
+        else:
+            pos_h += step_h
+    else:
+        ang_h = pos_h * -1
+        ang_v = pos_v * -1
+        pan_tilt(ang_h, ang_v)
+        time.sleep(2)
+
+    time.sleep(3)
+
 
 global studio_url
 studio_url = "http://blupants.org"
 
 index = 0
 apiPreference = cv2.CAP_ANY
-
-period = 0.02
-servo_hor = servo.Servo(1)
-servo_vert = servo.Servo(2)
-clckh = clock.Clock(servo_hor, period)
-clckv = clock.Clock(servo_vert, period)
 
 
 def wifi_connected():
@@ -33,7 +101,37 @@ def wifi_connected():
     return False
 
 
-def _set_wifi(ssid, pw, tries=5):
+def _set_wifi_wpa_supplicant(ssid, pw, enc, tries=5):
+    # reference: https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md
+    protocol = enc
+    if protocol.upper() == "WPA":
+        protocol = "WPA-PSK"
+    tmp_wifi_file = "/tmp/blupants/blupants_wifi"
+    with open(tmp_wifi_file, "w") as f:
+        lines = "country=US\n"
+        lines += "ctrl_interface=DIR=/var/run/wpa_suplicant GROUP=netdev\n"
+        lines += "update_config=1\n"
+        lines += "\n"
+        lines += "network={\n"
+        lines += "    ssid=\"{}\"\n".format(ssid)
+        lines += "    scan_ssid=1\n"
+        lines += "    psk=\"{}\"\n".format(pw)
+        lines += "    key_mgmt={}\n".format(protocol)
+        lines += "}\n"
+        f.write(lines)
+    time.sleep(2)
+    cmd = "cp {} /etc/wpa_supplicant/wpa_supplicant.conf".format(tmp_wifi_file)
+    print(cmd)
+    os.system(cmd)
+    print(lines)
+
+    cmd = "wpa_cli -i wlan0 reconfigure || ( systemctl restart dhcpcd; wpa_cli -i wlan0 reconfigure; )"
+    print(cmd)
+    os.system(cmd)
+    time.sleep(5)
+
+
+def _set_wifi_connmanctl(ssid, pw, tries=5):
     tmp_wifi_file = "/tmp/blupants/blupants_wifi"
     ap_id = ""
     ssid_found = False
@@ -83,7 +181,7 @@ def _set_wifi(ssid, pw, tries=5):
     time.sleep(5)
 
 
-def set_config(config_data):
+def set_config(config_data, wifi_provider="connmanctl"):
     # WIFI:S:BluPantslab;T:WPA;P:s3cr3t@123;;
     resp = False
     ssid = ""
@@ -100,31 +198,84 @@ def set_config(config_data):
             password_fields = password.split(":")
             if len(password_fields) > 1:
                 pw = password_fields[1]
+            enc_fields = enc.split(":")
+            if len(enc_fields) > 1:
+                protocol = enc_fields[1]
     try:
-        resp = _set_wifi(ssid, pw)
+        if wifi_provider == "connmanctl":
+            resp = _set_wifi_connmanctl(ssid, pw)
+        if wifi_provider == "wpa_supplicant":
+            resp = _set_wifi_wpa_supplicant(ssid, pw, protocol)
     except:
         resp = False
     return resp
 
 
-def _init():
-    rcpy.set_state(rcpy.RUNNING)
-    # enable servos
-    servo.enable()
-    # start clock
-    clckh.start()
-    clckv.start()
+def run_pi(max_tries=-1):
+    if wifi_connected():
+        print("It is connected to WiFi already.")
+        return
+
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+    import imutils
+
+    qr_decoder = cv2.QRCodeDetector()
+
+    time.sleep(1)
+
+    counter = 0
+
+    # Read until video is completed
+    camera = PiCamera()
+    camera.resolution = (320, 240)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(320, 240))
+
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        counter += 1
+        time.sleep(0.25)
+        print("Trying to connect to Wifi vi QR Code ... Attempt [{}/{}]".format(counter, max_tries))
+
+        # grab the raw NumPy array representing the image, then initialize the t
+        image = frame.array
+        image = imutils.rotate_bound(image, 180)
+        time.sleep(0.3)
+        rawCapture.truncate(0)
+        time.sleep(0.3)
+
+        ret = len(image) > 0
+
+        if ret:
+            try:
+                data, bbox, rectified_image = qr_decoder.detectAndDecode(image)
+                # cv2.imwrite("/tmp/blupants/{}.png".format(str(count).zfill(4)), frame)
+                if len(data) > 0:
+                    print("Decoded Data : {}".format(data))
+                    set_config(data, "wpa_supplicant")
+                    time.sleep(2)
+                    if wifi_connected():
+                        print("Successfully connected to WiFi.")
+                        break
+                else:
+                    print("QR Code not detected")
+            except:
+                ret = False
+                pass
+        if 0 < max_tries <= counter:
+            print("Unable to connected to WiFi.")
+            break
+
+        move_camera(ret)
+
+        if (counter % 15) == 0:
+            if wifi_connected():
+                print("Successfully connected to WiFi.")
+                break
+    print("Done!")
 
 
-def _shutdown():
-    # stop clock
-    clckh.stop()
-    clckv.stop()
-    # disable servos
-    servo.disable()
-
-
-def run(max_tries=-1):
+def run_bbblue(max_tries=-1):
     if wifi_connected():
         print("It is connected to WiFi already.")
         return
@@ -143,21 +294,13 @@ def run(max_tries=-1):
     else:
         print("Error opening video stream or file")
 
-    pos_begin = -0.3
-    pos_end = 0.4
-    step_h = step_v = 0.1
-    pos_v = 0
-    pos_h = pos_begin
+
     counter = 0
     # Read until video is completed
     while cap.isOpened():
-        servo_vert.set(pos_v)
-        time.sleep(0.3)
-        servo_hor.set(pos_h)
         counter += 1
         time.sleep(0.25)
-        print("Trying to connect to Wifi vi QR Code ... Attempt [{}/{}] Servo position: V:[{}] H:[{}]"
-              .format(counter, max_tries, pos_v, pos_h))
+        print("Trying to connect to Wifi vi QR Code ... Attempt [{}/{}]".format(counter, max_tries))
         # Capture frame-by-frame
         ret, frame = cap.read()
         if ret:
@@ -179,25 +322,8 @@ def run(max_tries=-1):
         if 0 < max_tries <= counter:
             print("Unable to connected to WiFi.")
             break
-        if ret:
-            # Servo sweep
-            if pos_begin > pos_h or pos_h > pos_end:
-                step_h *= -1
-                pos_h += step_h
-                pos_v += step_v
-                if pos_begin > pos_v or pos_v > pos_end:
-                    step_v *= -1
-                    pos_v += step_v
-            else:
-                pos_h += step_h
-        else:
-            servo_vert.set(pos_v*-1)
-            time.sleep(0.3)
-            servo_hor.set(pos_h*-1)
-            time.sleep(2)
 
-        pos_h = round(pos_h, 2)
-        pos_v = round(pos_v, 2)
+        move_camera(ret)
 
         if (counter % 15) == 0:
             if wifi_connected():
@@ -208,9 +334,18 @@ def run(max_tries=-1):
 
 
 def main():
-    _init()
-    run()
-    _shutdown()
+    if robot_id == 0:
+        run_bbblue()
+    if robot_id == 1:
+        run_bbblue()
+    if robot_id == 2:
+        pass
+    if robot_id == 3:
+        pass
+    if robot_id == 4:
+        run_pi()
+    if robot_id == 5:
+        pass
 
 
 if __name__ == '__main__':
