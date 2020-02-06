@@ -216,7 +216,7 @@ def web_server():
         try:
             with open(dynamic_code_file) as f:
                 lines = f.readlines()
-                current_rpc_code = "\n".join(lines)
+                current_rpc_code = "\n".join(lines[7:])
         except Exception as ex:
             print(ex.message)
             return ""
