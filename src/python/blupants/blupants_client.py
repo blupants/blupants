@@ -209,6 +209,19 @@ def web_server():
     def console():
         return render_template('console.html')
 
+    @application.route('/rpc_code')
+    def rpc_code():
+        global dynamic_code_file
+        current_rpc_code = ""
+        try:
+            with open(dynamic_code_file) as f:
+                lines = f.readlines()
+                current_rpc_code = "\n".join(lines)
+        except Exception as ex:
+            print(ex.message)
+            return ""
+        return current_rpc_code
+
     application.run(host='0.0.0.0', port="1370", threaded=True)
 
 
