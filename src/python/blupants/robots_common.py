@@ -26,12 +26,6 @@ class RobotConfig:
     config = {}
 
     def __init__(self):
-        self.camera_pos = 0
-        self.camera_toggle_positions = [
-            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
-            [89.0, -30.0], [89.0, 0], [0, 0]
-        ]
-        self.camera_toggle_positions = []
         self.reload()
 
     def reload(self):
@@ -145,6 +139,11 @@ class RobotHollow:
 
     def __init__(self):
         self.standard_output = StudioConsole()
+        self.camera_pos = 0
+        self.camera_toggle_positions = [
+            [-89.0, 0], [89.0, 0], [89.0, 30.0], [0, 30.0], [-89.0, 30.0], [-89.0, 0], [-89.0, -30.0], [0, -30.0],
+            [89.0, -30.0], [89.0, 0], [0, 0]
+        ]
 
     def reload(self):
         try:
