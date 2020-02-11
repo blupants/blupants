@@ -4,6 +4,7 @@ import time
 import random
 import json
 import time
+import pyttsx3
 from gpiozero import AngularServo
 from gpiozero import Motor
 from gpiozero import DistanceSensor
@@ -20,6 +21,8 @@ class RaspberryPi(robots_common.RobotHollow):
         self.running = False
         self.reload()
         self.running = True
+        self.tts_engine = pyttsx3.init()
+        self.tts_engine.setProperty('rate', 150)
 
     def reload(self):
         super().reload()
@@ -231,6 +234,7 @@ class RaspberryPi(robots_common.RobotHollow):
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
         self.look_angle(0, quiet=True)
+        self.say("Yes!", quiet)
         self.set_servo(self.servo_vertical, 60.0, quiet=True)
         self.set_servo(self.servo_vertical, -60.0, quiet=True)
         self.set_servo(self.servo_vertical, 60.0, quiet=True)
@@ -239,10 +243,24 @@ class RaspberryPi(robots_common.RobotHollow):
     def say_no(self, quiet=False):
         self.print_stdout("say_no()", quiet)
         self.look_angle(0, quiet=True)
+        self.say("No!", quiet)
         self.set_servo(self.servo_horizontal, 60.0, quiet=True)
         self.set_servo(self.servo_horizontal, -60.0, quiet=True)
         self.set_servo(self.servo_horizontal, 60.0, quiet=True)
         self.look_angle(0, quiet=True)
+
+    def say_welcome(self, quiet=False):
+        self.print_stdout("say_welcome()", quiet)
+        self.say_yes(True)
+        message = "Welcome to BluPants! My name is {} robot. Are you ready for learning Computer Science with me? " \
+                  "Visit blupants.org to get started.".format(self.name)
+        self.say(message, quiet)
+
+    def say(self, message, quiet=False):
+        self.print_stdout(message, quiet)
+        if not quiet:
+            self.tts_engine.say(message)
+            self.tts_engine.runAndWait()
 
 
 def test():
@@ -251,12 +269,13 @@ def test():
     a.say_yes()
     #a.claw_open()
     a.sleep(1)
+    a.say_welcome()
     #a.claw_close()
     a.say_no()
-    for i in range(0, 20):
-        a.camera_toggle()
-        print(i)
-        time.sleep(0.3)
+    # for i in range(0, 20):
+    #     a.camera_toggle()
+    #     print(i)
+    #     time.sleep(0.3)
     a.say_no()
     a.look_angle(0)
     a.sleep(1)
