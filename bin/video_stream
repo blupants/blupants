@@ -28,16 +28,24 @@ shutdown_file = "/tmp/blupants/shutdown"
 
 app = Flask(__name__)
 
+if robot_id == 0 or robot_id == 1:
+    global video
+    import cv2
+    video = cv2.VideoCapture(0)
+
+if robot_id == 4:
+    global camera
+    import imutils
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+    camera = PiCamera()
+
 
 def gen():
     import cv2
 
     if robot_id == 4:
-        import imutils
-        from picamera.array import PiRGBArray
-        from picamera import PiCamera
-
-        camera = PiCamera()
+        global camera
         camera.resolution = (320, 240)
         camera.framerate = 32
         rawCapture = PiRGBArray(camera, size=(320, 240))
