@@ -20,9 +20,9 @@ class RaspberryPi(robots_common.RobotHollow):
         super().__init__()
         self.running = False
         self.reload()
-        self.running = True
         self.tts_engine = pyttsx3.init()
         self.tts_engine.setProperty('rate', 150)
+        self.running = True
 
     def reload(self):
         super().reload()
@@ -259,8 +259,11 @@ class RaspberryPi(robots_common.RobotHollow):
     def say(self, message, quiet=False):
         self.print_stdout(message, quiet)
         if not quiet:
-            self.tts_engine.say(message)
-            self.tts_engine.runAndWait()
+            try:
+                self.tts_engine.say(message)
+                self.tts_engine.runAndWait()
+            except:
+                pass
 
 
 def test():

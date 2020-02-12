@@ -28,21 +28,21 @@ shutdown_file = "/tmp/blupants/shutdown"
 
 app = Flask(__name__)
 
-if robot_id == 0 or robot_id == 1:
-    global video
+if use_opencv:
     import cv2
-    video = cv2.VideoCapture(0)
+    if robot_id == 0 or robot_id == 1:
+        global video
+        video = cv2.VideoCapture(0)
 
-if robot_id == 4:
-    global camera
-    import imutils
-    from picamera.array import PiRGBArray
-    from picamera import PiCamera
-    camera = PiCamera()
+    if robot_id == 4:
+        global camera
+        import imutils
+        from picamera.array import PiRGBArray
+        from picamera import PiCamera
+        camera = PiCamera()
 
 
 def gen():
-    import cv2
 
     if robot_id == 4:
         global camera
@@ -63,7 +63,7 @@ def gen():
                 break
 
     if robot_id == 0 or robot_id == 1:
-        video = cv2.VideoCapture(0)
+        global video
         if video.isOpened():
             video.set(cv2.CAP_PROP_FPS, 1)
             video.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
@@ -85,6 +85,51 @@ def gen():
     time.sleep(1)
 
 
+def _bluetooth_start():
+    try:
+        if "bluetooth_addr" in blupants_client.config:
+            bluetooth_addr = blupants_client.config["bluetooth_addr"]
+            if len(bluetooth_addr) == 0:
+                return
+            cmd = "echo agent on | bluetoothctl"
+            os.system(cmd)
+            cmd = "echo default-agent | bluetoothctl"
+            os.system(cmd)
+            cmd = "echo pair {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+            cmd = "echo connect {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+            cmd = "echo trust {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+
+            cmd = "LANG=C pulseaudio -vvvv --log-time=1 -D --system --disallow-exit --disable-shm"
+            os.system(cmd)
+            cmd = "pactl load-module module-bluetooth-policy"
+            os.system(cmd)
+            cmd = "pactl load-module module-bluetooth-discover"
+            os.system(cmd)
+            cmd = "echo connect {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+
+            cmd = "pactl list sinks > /tmp/blupants/sinks"
+            os.system(cmd)
+
+            time.sleep(3)
+
+            with open("/tmp/blupants/sinks", "r") as f:
+                for line in f.readlines():
+                    if line.lower().find("name: ") != -1:
+                        tmp = line.split(": ")
+                        if len(tmp) > 1:
+                            sink = tmp[1]
+                            sink = sink.replace("\n", "")
+                            cmd = "pactl set-default-sink {}".format(sink)
+                            os.system(cmd)
+                            return
+    except:
+        pass
+
+
 @app.route('/')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
@@ -92,6 +137,8 @@ def video_feed():
 
 
 if __name__ == '__main__':
+    if robot_id == 0 or robot_id == 1:
+        _bluetooth_start()
     if use_opencv:
         #app.run(host='0.0.0.0', debug=True, threaded=True)
         app.run(host='0.0.0.0', port="8081")

@@ -3,6 +3,7 @@ import os
 import time
 import random
 import json
+import pyttsx3
 import rcpy
 import rcpy.motor as motor
 import rcpy.servo as servo
@@ -41,6 +42,9 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         # start clock
         for i in range(0, 8):
             self.clcks[i].start()
+
+        self.tts_engine = pyttsx3.init()
+        self.tts_engine.setProperty('rate', 150)
         self.running = True
 
     def reload(self):
@@ -233,6 +237,22 @@ class BluPants(BeagleBoneBlue):
         self.set_motor(self.motor_front_right, 0, quiet=True)
         self.set_motor(self.motor_back_right, 0, quiet=True)
 
+    def say_welcome(self, quiet=False):
+        self.print_stdout("say_welcome()", quiet)
+        self.say_yes(True)
+        message = "Welcome to BluPants! My name is {} robot. Are you ready for learning Computer Science with me? " \
+                  "Visit blupants.org to get started.".format(self.name)
+        self.say(message, quiet)
+
+    def say(self, message, quiet=False):
+        self.print_stdout(message, quiet)
+        if not quiet:
+            try:
+                self.tts_engine.say(message)
+                self.tts_engine.runAndWait()
+            except:
+                pass
+
 
 class BluPantsCar(BluPants):
     def __init__(self):
@@ -274,6 +294,7 @@ class BluPantsCar(BluPants):
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
         self.look_angle(0, quiet=True)
+        self.say("Yes!", quiet)
         self.set_servo(self.servo_vertical, 60.0, quiet=True)
         self.set_servo(self.servo_vertical, -60.0, quiet=True)
         self.set_servo(self.servo_vertical, 60.0, quiet=True)
@@ -282,6 +303,7 @@ class BluPantsCar(BluPants):
     def say_no(self, quiet=False):
         self.print_stdout("say_no()", quiet)
         self.look_angle(0, quiet=True)
+        self.say("No!", quiet)
         self.set_servo(self.servo_horizontal, 60.0, quiet=True)
         self.set_servo(self.servo_horizontal, -60.0, quiet=True)
         self.set_servo(self.servo_horizontal, 60.0, quiet=True)
@@ -369,6 +391,7 @@ class EduMIP(BluPants):
 
     def say_no(self, quiet=False):
         self.print_stdout("say_no()", quiet)
+        self.say("No!", quiet)
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
         self.set_servo(self.servo_shoulder_right, 0, quiet=True)
         self.sleep(0.2, quiet=True)
@@ -383,6 +406,7 @@ class EduMIP(BluPants):
 
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
+        self.say("Yes!", quiet)
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
         self.set_servo(self.servo_shoulder_right, 0, quiet=True)
         self.sleep(0.2, quiet=True)
@@ -394,4 +418,5 @@ class EduMIP(BluPants):
         self.sleep(0., quiet=True)
         self.set_servo(self.servo_shoulder_right, 0, quiet=True)
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
+
 
