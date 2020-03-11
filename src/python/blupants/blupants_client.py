@@ -6,6 +6,7 @@ import json
 import requests
 import socket
 import threading
+import uuid
 
 try:
     import robots_common
@@ -19,17 +20,24 @@ except:
 
 
 global studio_url
+studio_url = "http://127.0.0.1:5000"
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
 studio_url = "http://blupants.org"
 
 global local_ip
 local_ip = "127.0.0.1"
 
+global robot_uuid
+robot_uuid = ""
+
 global robot_id
 robot_id = 0
 
 global robot_name
-robot_name = ""
+robot_name = "BluPants"
+
+global robot_class
+robot_class = ""
 
 global dynamic_code_file
 dynamic_code_file = "/tmp/blupants/blupants_rpc.py"
@@ -46,18 +54,21 @@ except Exception as e:
 if "robot_id" in config:
     robot_id = config["robot_id"]
 
+if "name" in config:
+    robot_name = config["name"]
+
 if robot_id == 0:
-    robot_name = "blupants_car"
+    robot_class = "blupants_car"
 if robot_id == 1:
-    robot_name = "edumip"
+    robot_class = "edumip"
 if robot_id == 2:
-    robot_name = "gripper"
+    robot_class = "gripper"
 if robot_id == 3:
-    robot_name = "ev3"
+    robot_class = "ev3"
 if robot_id == 4:
-    robot_name = "raspberrypi"
+    robot_class = "raspberrypi"
 if robot_id == 5:
-    robot_name = "beagleboneblack"
+    robot_class = "beagleboneblack"
 
 
 def _create_rpc_content(code="", version=1, quiet=False):
@@ -73,7 +84,7 @@ def _create_rpc_content(code="", version=1, quiet=False):
 
 def _create_rpc_file_header(version=1):
     header_import = ""
-    object_definition = "global robot\nrobot = robots.Robot(\"{}\")\n".format(robot_name)
+    object_definition = "global robot\nrobot = robots.Robot(\"{}\")\n".format(robot_class)
     dyn_code = header_import + object_definition + "\n\n"
     return dyn_code
 
@@ -83,7 +94,7 @@ def _reset_rpc_module():
 
 
 def exec_rpc_code(code="", version=1, quiet=False):
-    print("Executing code for robot: [{}]".format(robot_name))
+    print("Executing code for robot: [{}]".format(robot_class))
     python_code = _create_rpc_content(code, version, quiet)
     print(python_code)
     exec(python_code)
@@ -131,10 +142,14 @@ def get_local_ip():
 
 
 def get_code():
+    global robot_name
+    global robot_uuid
     url = studio_url + "/api/v1/code"
     private_ip = get_local_ip()
     params = dict(
-        id=private_ip
+        id=private_ip,
+        name=robot_name,
+        robot_uuid=robot_uuid
     )
     try:
         resp = requests.get(url=url, params=params, timeout=5)
@@ -158,8 +173,10 @@ def shutdown():
 
 def run():
     global robot_id
+    global robot_uuid
     global running
     running = True
+    robot_uuid = uuid.uuid4().hex
 
     dyn_code = "robot.claw_toggle()\n"
     dyn_code += "robot.say_welcome()\n"
