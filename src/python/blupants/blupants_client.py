@@ -141,13 +141,30 @@ def get_local_ip():
     return local_ip
 
 
+def get_public_ip():
+    public_ip = ""
+
+    url = "https://api.ipify.org/?format=json"
+    try:
+        resp = requests.get(url=url, timeout=5)
+        data = resp.json()
+    except:
+        data = ""
+    if "ip" in data:
+        public_ip = data["ip"]
+
+    return public_ip
+
+
 def get_code():
     global robot_name
     global robot_uuid
     url = studio_url + "/api/v1/code"
     private_ip = get_local_ip()
+    public_ip = get_public_ip()
     params = dict(
         id=private_ip,
+        public_ip=public_ip,
         name=robot_name,
         robot_uuid=robot_uuid
     )
@@ -156,7 +173,6 @@ def get_code():
         data = resp.json()
     except:
         data = ""
-    # TODO change server to send the code type
     if "version" in data and "type" in data and "payload" in data:
         code = data
     else:
