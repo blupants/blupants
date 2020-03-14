@@ -24,6 +24,12 @@ studio_url = "http://127.0.0.1:5000"
 studio_url = "http://flask-env.6xabhva87h.us-east-2.elasticbeanstalk.com"
 studio_url = "http://blupants.org"
 
+global request_counter
+request_counter = 0
+
+global public_ip
+public_ip = ""
+
 global local_ip
 local_ip = "127.0.0.1"
 
@@ -142,14 +148,22 @@ def get_local_ip():
 
 
 def get_public_ip():
-    public_ip = ""
+    global public_ip
+    global request_counter
+
+    request_counter += 1
+
+    if request_counter < 30 and len(public_ip) > 0:
+        return public_ip
+    else:
+        request_counter = 0
 
     url = "https://api.ipify.org/?format=json"
     try:
         resp = requests.get(url=url, timeout=5)
         data = resp.json()
     except:
-        data = ""
+        return public_ip
     if "ip" in data:
         public_ip = data["ip"]
 
