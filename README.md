@@ -35,6 +35,12 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     $ cd /root
     Make sure rcpy is installed
     # python3 -m pip install rcpy --upgrade
+    
+    Disable usb0 gateway so ipv4 gateway gets assigned to wlan0
+    # vi /etc/network/interfaces
+    Comment the following line:
+    #    gateway 192.168.7.1
+    
     https://github.com/StrawsonDesign/librobotcontrol
     # git clone https://github.com/blupants/blupants.git
     # git clone https://github.com/StrawsonDesign/librobotcontrol.git
@@ -51,17 +57,33 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # mkdir -p /var/lib/cloud9/BluPants
     # cp ./blupants/src/python/*.py /var/lib/cloud9/BluPants/
     # chmod +s /usr/bin/python3
+    # apt-get install espeak
+    # python3 -m pip install pyttsx3
+    
+    (If fails, try specific version)
+    # python3 -m pip install pyttsx3==2.81
+
+    # apt-get install autoconf-archive
     # python3 -m pip install blupants --upgrade
     # git clone https://github.com/brgl/libgpiod
     # cd libgpiod
-    # apt-get install autoconf-archive
     # ./autogen.sh --enable-tools=yes --enable-bindings-python --prefix=/usr/local
+    
+    Or in the case you get an error because libgpiod needs a newer kernel version, use older libgpiod
+    https://github.com/aquaticus/nexus433/issues/21
+    # wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.1.1.tar.gz
+    # tar xvf libgpiod-1.1.1.tar.gz
+    # cd libgpiod-1.1.1
+    # export PYTHON_VERSION=3
+    # ./autogen.sh --enable-tools=yes --enable-bindings-python --prefix=/usr/local
+    
     # make
     # make install
     # mv /usr/local/lib/python3.5/site-packages/* /usr/local/lib/python3.5/dist-packages/.
     # echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
     # cd
-    # cp -r blupants/src/python/blupants/*.py /usr/local/lib/python3.5/dist-packages/blupants/
+    # cp -r blupants/src/python/blupants/* /usr/local/lib/python3.5/dist-packages/blupants/
+    # cp /usr/local/lib/python3.5/dist-packages/blupants/blupants.json /root/
     # rm -rf /usr/local/lib/python3.5/dist-packages/blupants/*.pyc 
     # systemctl daemon-reload
     # systemctl enable blupants.service
