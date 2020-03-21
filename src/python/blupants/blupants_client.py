@@ -77,6 +77,85 @@ if robot_id == 5:
     robot_class = "beagleboneblack"
 
 
+def _get_pacmd_arg(mem_file):
+    pacmd_arg = ""
+    with open(mem_file, "r") as f:
+        for line in f.readlines():
+            if line.lower().find("name: ") != -1:
+                tmp = line.split(": ")
+                if len(tmp) > 1:
+                    arg = tmp[1]
+                    arg = arg.replace("\n", "")
+                    arg = arg.replace("<", "")
+                    arg = arg.replace(">", "")
+                    pacmd_arg = arg
+                    return pacmd_arg
+    return pacmd_arg
+
+
+def _bluetooth_start():
+    global robot_id
+    if robot_id != 0 and robot_id != 1:
+        return
+    try:
+        if "bluetooth_addr" in config:
+            bluetooth_addr = config["bluetooth_addr"]
+            if len(bluetooth_addr) == 0:
+                return
+            cmd = "echo power on | bluetoothctl"
+            os.system(cmd)
+            cmd = "echo agent on | bluetoothctl"
+            os.system(cmd)
+            cmd = "echo default-agent | bluetoothctl"
+            os.system(cmd)
+            cmd = "echo scan on | bluetoothctl"
+            os.system(cmd)
+
+            cmd = "service bluealsa stop"
+            os.system(cmd)
+            time.sleep(3)
+            cmd = "pulseaudio --start"
+            os.system(cmd)
+            time.sleep(3)
+
+            _bluetooth_connect()
+    except:
+        pass
+
+
+def _bluetooth_connect():
+    if robot_id != 0 and robot_id != 1:
+        return
+    try:
+        if "bluetooth_addr" in config:
+            bluetooth_addr = config["bluetooth_addr"]
+            if len(bluetooth_addr) == 0:
+                return
+
+            cmd = "echo pair {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+            cmd = "echo trust {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+            cmd = "echo connect {} | bluetoothctl".format(bluetooth_addr)
+            os.system(cmd)
+
+            cmd = "pacmd list-cards > /tmp/blupants/cards"
+            os.system(cmd)
+            time.sleep(1)
+            card = _get_pacmd_arg("/tmp/blupants/cards")
+            cmd = "pacmd set-card-profile {} a2dp_sink".format(card)
+            os.system(cmd)
+
+            cmd = "pacmd list-sinks > /tmp/blupants/sinks"
+            os.system(cmd)
+            time.sleep(1)
+            sink = _get_pacmd_arg("/tmp/blupants/sinks")
+            cmd = "pacmd set-default-sink {}".format(sink)
+            os.system(cmd)
+    except:
+        pass
+
+
 def _create_rpc_content(code="", version=1, quiet=False):
     rpc_code = _create_rpc_file_header(version)
     start_code = "robot.say(\"Initializing code execution!\")\n\n"
@@ -158,6 +237,8 @@ def get_public_ip():
     else:
         request_counter = 0
 
+    _bluetooth_start()
+
     url = "https://api.ipify.org/?format=json"
     try:
         resp = requests.get(url=url, timeout=5)
@@ -207,6 +288,8 @@ def run():
     global running
     running = True
     robot_uuid = uuid.uuid4().hex
+
+    _bluetooth_start()
 
     dyn_code = "robot.claw_toggle()\n"
     dyn_code += "robot.say_welcome()\n"
