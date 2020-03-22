@@ -55,7 +55,7 @@ Run the following commands to get BluPants running in your BegaleBoneBlue:
     # chmod +x /etc/robotcontrol/start.sh
     # cp ./blupants/etc/blupants.service /etc/systemd/system/
     # mkdir -p /var/lib/cloud9/BluPants
-    # cp ./blupants/src/python/*.py /var/lib/cloud9/BluPants/
+    # cp ./blupants/src/python/reload.py /var/lib/cloud9/BluPants/
     # chmod +s /usr/bin/python3
     # apt-get install espeak
     # python3 -m pip install pyttsx3
