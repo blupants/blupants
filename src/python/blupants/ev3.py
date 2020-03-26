@@ -67,7 +67,7 @@ class EV3(robots_common.RobotHollow):
 
         self.infrared_sensor = None
         try:
-            self.infrared_sensor = lego.InfraredSensor(sensor.INPUT_1)
+            self.infrared_sensor = lego.InfraredSensor(sensor.INPUT_4)
         except:
             pass
 
