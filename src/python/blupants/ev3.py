@@ -216,8 +216,8 @@ class Gripp3r(EV3):
         time_sp = period * 1000
         for i in range(0, 4):
             try:
-                speed_sp = speed_sp * self.duty_ratio[i]
-                self.motors[i].run_timed(time_sp=time_sp, speed_sp=speed_sp)
+                motor_speed_sp = speed_sp * self.duty_ratio[i]
+                self.motors[i].run_timed(time_sp=time_sp, speed_sp=motor_speed_sp)
             except:
                 pass
 
