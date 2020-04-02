@@ -156,8 +156,8 @@ class RaspberryPi(robots_common.RobotHollow):
         period = blocks * self.block_length / speed
         motor_index = 0
         for motor in self.motors:
-            speed = speed * self.duty_ratio[motor_index]
-            motor.forward(speed)
+            motor_speed = speed * self.duty_ratio[motor_index]
+            motor.forward(motor_speed)
             motor_index += 1
         self.sleep(period, quiet=True)
         for motor in self.motors:
@@ -168,16 +168,19 @@ class RaspberryPi(robots_common.RobotHollow):
             speed = self.duty
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks * self.block_length / speed
+        motor_index = 0
         for motor in self.motors:
-            motor.backward(speed)
+            motor_speed = speed * self.duty_ratio[motor_index]
+            motor.backward(motor_speed)
+            motor_index += 1
         self.sleep(period, quiet=True)
         for motor in self.motors:
             motor.stop()
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
-        duty = 0.5  # Use fixed duty cycle for turning
-        index=0
+        duty = 0.85  # Use fixed duty cycle for turning
+        index = 0
         for motor in self.motors:
             if index % 2 == 0:
                 # Left motor
@@ -185,15 +188,15 @@ class RaspberryPi(robots_common.RobotHollow):
             else:
                 # Right motor
                 motor.backward(duty)
-            index+=1
+            index += 1
         self.sleep(angle * self.turn_right_period, quiet=True)
         for motor in self.motors:
             motor.stop()
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
-        duty = 0.5  # Use fixed duty cycle for turning
-        index=0
+        duty = 0.85  # Use fixed duty cycle for turning
+        index = 0
         for motor in self.motors:
             if index % 2 == 0:
                 # Left motor
@@ -201,7 +204,7 @@ class RaspberryPi(robots_common.RobotHollow):
             else:
                 # Right motor
                 motor.forward(duty)
-            index+=1
+            index += 1
         self.sleep(angle * self.turn_left_period, quiet=True)
         for motor in self.motors:
             motor.stop()
