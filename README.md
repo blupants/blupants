@@ -1,31 +1,48 @@
-# BluPants: Agnostic Programming Platform for Robots
+# BluPants: Web Based IDE for Coding Robots
 
-BluPants is a Python based module to control robots and IoT automation devices via [BluPants Coding Lab](https://blupants.org). Visit https://blupants.com for more details.
+Our goal is make robotics and programming available to anyone. 
 
-The Project goal is make robotics and programming available to anyone. 
+BluPants is the most effective and fun way to learn coding. It is a free out of the box web based coding environment (IDE) that works with a variety of [robots](https://blupants.com/robots#cdd08a2f-fd49-403f-bec8-3e3e477ffc5a).
+
+Pre-readers can start with the [basic block-based visual programming language](http://blupants.org/studio?level=0). Readers can use the [intermediate block-based visual](http://blupants.org/studio?level=1) for coding and gradually advanced to the [Python mode](http://blupants.org/studio?level=2) programming language.
+
+All that using the same [BluPants IDE](http://blupants.org) with any of the supported [robots](https://blupants.com/robots#cdd08a2f-fd49-403f-bec8-3e3e477ffc5a).  
+
+Visit [blupants.com](https://blupants.com) for more details.
 
 ## Welcome
 Let's build a community for any child across the globe from the age of 5 to 99.
-Together we can build the tools to make the journey to STEM accessible to anyone.
 
 Compatibility with a variety of existing robotics hardware can make it affordable, at the same time we give unlimited flexibility to expand BluPants as far as the human imagination can go.
 
+Check out this [video](https://youtu.be/xfamu1fHa2E) and see how you can take coding classes to the next level with real robots. We show how students can start with block-based visual programming language and gradually advance to Python.
+
+## BluPants Python Documentation
+The blupants Python module documentation can be found [here](http://blupants.org/help). Check all available functions for coding your robot with Python. 
+
+## Get a Robot
+Visit [blupants.com/robots](https://blupants.com/robots) or our [Hackster.io page](https://www.hackster.io/blupantsrobot/projects) for complete instructions on how to get your own robot up and running.
+
+## Start Coding
+Once you get your robot on and connected to the internet, simply visit [blupants.org](http://blupants.org) and start coding.
+
+You may also visit our [blupants.com/lessons](https://blupants.com/lessons) to get some ideas on how code with BluPants.
 
 ## Dependencies
 BluPants is based on the following projects:
 
-[BeagleBoneBlue](https://beagleboard.org/blue)
+[Python](https://www.python.org/)
 
-[EduMIP](https://beagleboard.org/p/edumip/edumip-13a29c)
+[BeagleBone](https://beagleboard.org/bone)
 
-Robot Control Library - [documentation](http://strawsondesign.com/docs/librobotcontrol/) / [Github](https://github.com/StrawsonDesign/librobotcontrol)
+[Raspberry Pi](https://www.raspberrypi.org/)
 
-RCPy - [documentation](https://guitar.ucsd.edu/rcpy/html/index.html) / [Github](https://github.com/mcdeoliveira/rcpy)
+[LEGO® MINDSTORMS: ev3dev](https://www.ev3dev.org/)
 
-[Blockly](https://developers.google.com/blockly/)
+[Blockly](https://developers.google.com/blockly)
 
 
-## Deployment
+## Manual Deployment
 Run the following commands to get BluPants running in your BegaleBoneBlue:
 
     $ ssh beaglebone.local
