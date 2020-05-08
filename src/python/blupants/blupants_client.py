@@ -54,8 +54,8 @@ config_obj = robots_common.RobotConfig()
 
 try:
     config = config_obj.config
-except Exception as e:
-    print(e.message)
+except:
+    pass
 
 if "robot_id" in config:
     robot_id = config["robot_id"]
@@ -347,8 +347,7 @@ def web_server():
             with open(dynamic_code_file) as f:
                 lines = f.readlines()
                 current_rpc_code = "\n".join(lines[7:])
-        except Exception as ex:
-            print(ex.message)
+        except:
             return ""
         return current_rpc_code
 

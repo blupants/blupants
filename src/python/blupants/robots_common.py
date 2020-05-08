@@ -36,8 +36,8 @@ class RobotConfig:
             with open(default_config_file) as f:
                 try:
                     self._default_config = json.load(f)
-                except Exception as e:
-                    print(e.message)
+                except:
+                    pass
 
         if os.path.isfile(config_file):
             with open(config_file) as f:
@@ -151,8 +151,8 @@ class RobotHollow:
             new_config = self._robot_config_obj.config
             if isinstance(new_config, dict):
                 self.config = new_config
-        except Exception as ex:
-            print("Unable to reload robot config: {}".format(str(ex.message)))
+        except:
+            print("Unable to reload robot config")
 
     def _warning(self, name=""):
         self.print_stdout("RobotHollow: Method {} not implemented!".format(name))
