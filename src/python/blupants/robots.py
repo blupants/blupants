@@ -367,3 +367,16 @@ try:
     factory.register_robot("gripper", ev3.Gripp3r)
 except:
     pass
+
+try:
+    import alphabot2
+except:
+    try:
+        import blupants.alphabot2 as alphabot2
+    except:
+        pass
+try:
+    factory.register_robot("alphabot", alphabot2.AlphaBot2)
+    factory.register_robot("alphabot2", alphabot2.AlphaBot2)
+except:
+    pass

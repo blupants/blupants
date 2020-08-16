@@ -75,6 +75,8 @@ if robot_id == 4:
     robot_class = "raspberrypi"
 if robot_id == 5:
     robot_class = "beagleboneblack"
+if robot_id == 6:
+    robot_class = "alphabot2"
 
 
 def _get_pacmd_arg(mem_file):
@@ -182,14 +184,19 @@ def exec_rpc_code(code="", version=1, quiet=False):
     print("Executing code for robot: [{}]".format(robot_class))
     python_code = _create_rpc_content(code, version, quiet)
     print(python_code)
-    exec(python_code)
     try:
+        exec(python_code)
         with open(dynamic_code_file, "w") as f:
             rpc_headers = "import blupants.robots_common as robots_common\n" \
                           "import blupants.robots as robots\n\n"
             f.write(rpc_headers + python_code)
     except:
-        pass
+        try:
+            dyn_code = "robot.say(\"ERROR! Check your code syntax.\")\n"
+            python_code = _create_rpc_content(dyn_code, version, False)
+            exec(python_code)
+        except:
+            pass
 
 
 def execute_python_code(py, version=1):
