@@ -6,6 +6,7 @@ import json
 import time
 import pyttsx3
 import RPi.GPIO as GPIO
+from gpiozero import Motor
 import time
 import math
 import smbus
@@ -55,40 +56,46 @@ class AlphaBot2(robots_common.RobotHollow):
         self.servo_horizontal = self.config["alphabot"]["camera"]["servo_horizontal"]
         self.servo_vertical = self.config["alphabot"]["camera"]["servo_vertical"]
 
-        self.IN1 = 7
-        self.IN2 = 8
-        self.IN3 = 9
-        self.IN4 = 10
+        self.ENA = 6
+        self.AIN1 = 12
+        self.AIN2 = 13
+        self.BIN1 = 20
+        self.BIN2 = 21
+        self.ENB = 26
 
-        self.IN1 = self.config["alphabot"]["motor"]["pinout"]["IN1"]
-        self.IN2 = self.config["alphabot"]["motor"]["pinout"]["IN2"]
-        self.IN3 = self.config["alphabot"]["motor"]["pinout"]["IN3"]
-        self.IN4 = self.config["alphabot"]["motor"]["pinout"]["IN4"]
+        self.ENA = self.config["alphabot"]["motor"]["pinout"]["ENA"]
+        self.AIN1 = self.config["alphabot"]["motor"]["pinout"]["AIN1"]
+        self.AIN2 = self.config["alphabot"]["motor"]["pinout"]["AIN2"]
+        self.BIN1 = self.config["alphabot"]["motor"]["pinout"]["BIN1"]
+        self.BIN2 = self.config["alphabot"]["motor"]["pinout"]["BIN2"]
+        self.ENB = self.config["alphabot"]["motor"]["pinout"]["ENB"]
 
-        self.servos = [17, 27, 22]
-        self.servos = self.config["alphabot"]["servos"]
-
-        self.trigger = 18
-        self.echo = 24
+        self.trigger = 22
+        self.echo = 27
 
         self.trigger = self.config["alphabot"]["hcsr04"]["trigger"]
         self.echo = self.config["alphabot"]["hcsr04"]["echo"]
 
-        motor_left = (self.IN1, self.IN2)
-        motor_right = (self.IN3, self.IN4)
+        motor_left = [self.AIN1, self.AIN2]
+        motor_right = [self.BIN1, self.BIN2]
 
         GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
+        GPIO.setwarnings(True)
+
+        self.motors = [Motor(backward=motor_left[0], forward=motor_left[1], enable=self.ENA),
+                       Motor(backward=motor_right[0], forward=motor_right[1], enable=self.ENB)]
+
         GPIO.setup(self.trigger, GPIO.OUT, initial=GPIO.LOW)
         GPIO.setup(self.echo, GPIO.IN)
 
         self.pwm = PCA9685(0x40, debug=False)
         self.pwm.setPWMFreq(50)
 
-
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
         self.running = False
+        for motor in self.motors:
+            motor.close()
         GPIO.cleanup()
 
     def sleep(self, seconds=1.0, quiet=False):
@@ -113,16 +120,11 @@ class AlphaBot2(robots_common.RobotHollow):
         motor_index = i-1
         if duty < 0:
             duty *= -1
-            #TODO
-            #self.motors[motor_index].backward(duty)
+            self.motors[motor_index].backward(duty)
         else:
-            #TODO
-            a=1
-            #self.motors[motor_index].forward(duty)
+            self.motors[motor_index].forward(duty)
         if -0.01 <= duty <= 0.01:
-            #TODO
-            a=1
-            #self.motors[motor_index].stop()
+            self.motors[motor_index].stop()
 
     def claw_toggle(self, quiet=False):
         if self.grab:
@@ -142,6 +144,7 @@ class AlphaBot2(robots_common.RobotHollow):
 
     def read_distance(self, quiet=False):
         # Read sonar
+        distance = -1
         GPIO.output(self.trigger, GPIO.HIGH)
         time.sleep(0.000015)
         GPIO.output(self.trigger, GPIO.LOW)
@@ -163,21 +166,20 @@ class AlphaBot2(robots_common.RobotHollow):
             self.print_stdout("Distance: [{}] cm.".format(str(distance)), quiet)
         return distance
 
-
     def move_forward(self, blocks=1, speed=-1, quiet=False):
         if speed < 0:
             speed = self.duty
         self.print_stdout("move_forward(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks * self.block_length / speed
         motor_index = 0
-        #TODO
-        # for motor in self.motors:
-        #     motor_speed = speed * self.duty_ratio[motor_index]
-        #     motor.forward(motor_speed)
-        #     motor_index += 1
-        # self.sleep(period, quiet=True)
-        # for motor in self.motors:
-        #     motor.stop()
+        for motor in self.motors:
+            motor_speed = speed * self.duty_ratio[motor_index]
+            motor.forward(motor_speed)
+            motor_index += 1
+        self.sleep(period, quiet=True)
+        for motor in self.motors:
+            motor.stop()
+        time.sleep(0.5)
 
     def move_backwards(self, blocks=1, speed=-1, quiet=False):
         if speed < 0:
@@ -185,48 +187,48 @@ class AlphaBot2(robots_common.RobotHollow):
         self.print_stdout("move_backwards(blocks={}, speed={})".format(blocks, speed), quiet)
         period = blocks * self.block_length / speed
         motor_index = 0
-        #TODO
-        # for motor in self.motors:
-        #     motor_speed = speed * self.duty_ratio[motor_index]
-        #     motor.backward(motor_speed)
-        #     motor_index += 1
-        # self.sleep(period, quiet=True)
-        # for motor in self.motors:
-        #     motor.stop()
+        for motor in self.motors:
+            motor_speed = speed * self.duty_ratio[motor_index]
+            motor.backward(motor_speed)
+            motor_index += 1
+        self.sleep(period, quiet=True)
+        for motor in self.motors:
+            motor.stop()
+        time.sleep(0.5)
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
-        duty = 0.85  # Use fixed duty cycle for turning
+        duty = 0.2  # Use fixed duty cycle for turning
         index = 0
-        #TODO
-        # for motor in self.motors:
-        #     if index % 2 == 0:
-        #         # Left motor
-        #         motor.forward(duty)
-        #     else:
-        #         # Right motor
-        #         motor.backward(duty)
-        #     index += 1
-        # self.sleep(angle * self.turn_right_period, quiet=True)
-        # for motor in self.motors:
-        #     motor.stop()
+        for motor in self.motors:
+            if index % 2 == 0:
+                # Left motor
+                motor.forward(duty)
+            else:
+                # Right motor
+                motor.backward(duty)
+            index += 1
+        self.sleep(angle * self.turn_right_period, quiet=True)
+        for motor in self.motors:
+            motor.stop()
+        time.sleep(0.5)
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
-        duty = 0.85  # Use fixed duty cycle for turning
+        duty = 0.2  # Use fixed duty cycle for turning
         index = 0
-        #TODO
-        # for motor in self.motors:
-        #     if index % 2 == 0:
-        #         # Left motor
-        #         motor.backward(duty)
-        #     else:
-        #         # Right motor
-        #         motor.forward(duty)
-        #     index += 1
-        # self.sleep(angle * self.turn_left_period, quiet=True)
-        # for motor in self.motors:
-        #     motor.stop()
+        for motor in self.motors:
+            if index % 2 == 0:
+                # Left motor
+                motor.backward(duty)
+            else:
+                # Right motor
+                motor.forward(duty)
+            index += 1
+        self.sleep(angle * self.turn_left_period, quiet=True)
+        for motor in self.motors:
+            motor.stop()
+        time.sleep(0.5)
 
     def camera_toggle(self, quiet=False):
         self.print_stdout("camera_toggle()", quiet)
@@ -371,97 +373,47 @@ def test():
     a = AlphaBot2()
     print("Test 002")
 
-    for i in range(0, 16):
-        a.camera_toggle()
-        a.sleep(0.5)
+    robot = a
+    robot.move_forward(2)
+    time.sleep(1)
+    robot.move_backwards(2)
+    time.sleep(1)
+    # robot.set_servo(1, 45)
+    # robot.move_forward(1)
+    # robot.set_servo(1, 0)
+    # robot.turn_right(90)
+    # robot.move_forward(1)
+    # robot.move_backwards(1)
+    # robot.turn_left(90)
 
-    a.set_servo(0, 0)
-    a.set_servo(1, 0)
-    a.sleep(1)
-
-    d=a.read_distance()
-    servo=0
-    a.set_servo(servo, 90)
-    a.sleep(1)
-    a.set_servo(servo, -90)
-    a.sleep(1)
-    a.set_servo(servo, 45)
-    a.sleep(1)
-    a.set_servo(servo, -45)
-    a.sleep(1)
-    a.set_servo(servo, 90)
-    a.sleep(1)
-    a.set_servo(servo, 0)
-    a.sleep(1)
-    # a.say(d)
+    # for i in range(0, 16):
+    #     a.camera_toggle()
+    #     a.sleep(0.5)
+    #
+    # a.set_servo(0, 0)
+    # a.set_servo(1, 0)
     # a.sleep(1)
-    # d = a.read_distance()
-    # print(d)
-    # a.move_forward()
-    # time.sleep(1)
-    # a.turn_right()
-    # time.sleep(1)
-    # a.turn_left()
-    # time.sleep(1)
-    # a.move_backwards()
-    # time.sleep(1)
-    # a.set_motor(1, -1)
-    # time.sleep(1)
-    # a.set_motor(2, 0.6)
-    # time.sleep(4)
-    # a.set_motor(1, 0)
-    # a.set_motor(2, 0)
-    # time.sleep(1)
-    # a.move_forward()
 
+    d = a.read_distance()
+    print(d)
+    servo = 0
+    # a.set_servo(servo, 90)
+    # a.sleep(1)
+    # a.set_servo(servo, -90)
+    # a.sleep(1)
+    # a.set_servo(servo, 45)
+    # a.sleep(1)
+    # a.set_servo(servo, -45)
+    # a.sleep(1)
+    # a.set_servo(servo, 90)
+    # a.sleep(1)
+    # a.set_servo(servo, 0)
+    # a.sleep(1)
 
-    # pwm = PCA9685(0x40, debug=True)
-    # pwm.setPWMFreq(50)
+    #a.turn_left()
 
-    # pwm.setServoPulse(0, 0)
-    # time.sleep(2)
-    # pwm.setServoPulse(0, 1500)
-    # time.sleep(2)
-    # pwm.setServoPulse(0, 2500)
-    # time.sleep(2)
-    # pwm.setServoPulse(0, 100)
-    # time.sleep(2)
-    # pwm.setServoPulse(0, 1500)
-    # time.sleep(2)
-
-    # ang = (0 * 11.11) + 1500
-    # pwm.setServoPulse(0, ang)
-    # time.sleep(2)
-    #
-    # ang = (90 * 11.11) + 1500
-    # pwm.setServoPulse(0, ang)
-    # time.sleep(2)
-    #
-    # ang = (-90 * 11.11) + 1500
-    # pwm.setServoPulse(0, ang)
-    # time.sleep(2)
-    #
-    # ang = (45 * 11.11) + 1500
-    # pwm.setServoPulse(0, ang)
-    # time.sleep(2)
-    #
-    # ang = (0 * 11.11) + 1500
-    # pwm.setServoPulse(0, ang)
-    # time.sleep(2)
-
-    # for s in range(0, 2):
-    #     # setServoPulse(2,2500)
-    #     for i in range(500, 2500, 10):
-    #         pwm.setServoPulse(s, i)
-    #         time.sleep(0.02)
-    #
-    #     for i in range(2500, 500, -10):
-    #         pwm.setServoPulse(s, i)
-    #         time.sleep(0.02)
-
+    # a.say_yes()
 
     a.shutdown()
 
-
 #test()
-

@@ -35,6 +35,42 @@
       "servo_vertical": "c"
     }
   },
+  "alphabot":
+  {
+    "claw":
+    {
+      "servo": 1,
+      "angle_open": 20.0,
+      "angle_close": -20.0
+    },
+    "hcsr04":
+    {
+      "trigger": 22,
+      "echo": 27,
+      "vcc": "VDD_5V",
+      "gnd": "DGND"
+    },
+    "motor":
+    {
+      "pinout":
+      {
+        "ENA": 6,
+        "AIN1": 12,
+        "AIN2": 13,
+        "BIN1": 20,
+        "BIN2": 21,
+        "ENB": 26
+      },
+      "duty_ratio": [0.95, 1.0, 1.0, 1.0],
+      "turn_right_period": 0.0025,
+      "turn_left_period": 0.00275
+    },
+    "camera":
+    {
+      "servo_horizontal": 0,
+      "servo_vertical": 1
+    }
+  },
   "raspberrypi":
   {
     "servos": [17, 27, 22],
