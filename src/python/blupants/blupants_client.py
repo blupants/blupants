@@ -186,17 +186,21 @@ def exec_rpc_code(code="", version=1, quiet=False):
     print(python_code)
     try:
         exec(python_code)
-        with open(dynamic_code_file, "w") as f:
-            rpc_headers = "import blupants.robots_common as robots_common\n" \
-                          "import blupants.robots as robots\n\n"
-            f.write(rpc_headers + python_code)
-    except:
+    except Exception as ex:
+        print(ex)
         try:
             dyn_code = "robot.say(\"ERROR! Check your code syntax.\")\n"
             python_code = _create_rpc_content(dyn_code, version, False)
             exec(python_code)
         except:
             pass
+    try:
+        with open(dynamic_code_file, "w") as f:
+            rpc_headers = "import blupants.robots_common as robots_common\n" \
+                          "import blupants.robots as robots\n\n"
+            f.write(rpc_headers + python_code)
+    except Exception as ex:
+        print(ex)
 
 
 def execute_python_code(py, version=1):
@@ -206,7 +210,6 @@ def execute_python_code(py, version=1):
         if len(cmd) <= 0:
             break
 
-        # TODO: Refactoring - implement an interface and remove all those if robot_id == x statements
         if s == "shutdown()":
             shutdown()
             time.sleep(5)
