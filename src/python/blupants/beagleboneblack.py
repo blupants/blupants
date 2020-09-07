@@ -246,7 +246,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         # Right motor
         self.set_motor(2, duty)
 
-        self.sleep(angle * self.turn_right_period, quiet=True)
+        self.sleep(angle * self.turn_left_period, quiet=True)
 
         self._stop()
 

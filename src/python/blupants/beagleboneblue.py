@@ -230,7 +230,7 @@ class BluPants(BeagleBoneBlue):
         self.set_motor(self.motor_front_right, duty, quiet=True)
         self.set_motor(self.motor_back_right, duty, quiet=True)
 
-        self.sleep(angle * self.turn_right_period, quiet=True)
+        self.sleep(angle * self.turn_left_period, quiet=True)
 
         self.set_motor(self.motor_front_left, 0, quiet=True)
         self.set_motor(self.motor_back_left, 0, quiet=True)

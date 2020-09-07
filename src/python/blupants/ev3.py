@@ -321,7 +321,7 @@ class Gripp3r(EV3):
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000
-        time_sp = angle * self.turn_right_period * 1000
+        time_sp = angle * self.turn_left_period * 1000
 
         motor_front_left_running = False
         motor_back_left_running = False
