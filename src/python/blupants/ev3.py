@@ -76,7 +76,7 @@ class EV3(robots_common.RobotHollow):
     def reload(self):
         super().reload()
         self.name = self.config["name"]
-        self.tts_all_commands = self.config["tts_all_commands"]
+        self.enable_tts = self.config["enable_tts"]
         self.period = self.config["period"]
         self.duty = self.config["duty"]
         self.block_length = self.config["block_length"]
@@ -91,8 +91,6 @@ class EV3(robots_common.RobotHollow):
         seconds_message = "seconds"
         if -2 < seconds < 2:
             seconds_message = "second"
-        if self.tts_all_commands:
-            self.say("Sleeping for {} {}.".format(seconds, seconds_message), quiet)
         time.sleep(seconds)
 
     def set_servo(self, i=1, angle=0.0, quiet=False):
@@ -141,15 +139,12 @@ class EV3(robots_common.RobotHollow):
         if self.infrared_sensor:
             distance = self.infrared_sensor.proximity
         message = "Distance is {} centimeters.".format(int(distance))
-        if self.tts_all_commands:
-            self.say(message, quiet)
-        else:
-            self.print_stdout(message, quiet)
+        self.print_stdout(message, quiet)
         return distance
 
     def say(self, message, quiet=False):
         self.print_stdout(message, quiet)
-        if not quiet:
+        if not quiet and self.enable_tts:
             self.sound.speak(message)
 
 
@@ -213,15 +208,11 @@ class Gripp3r(EV3):
 
     def claw_open(self, quiet=False):
         self.print_stdout("claw_open()", quiet)
-        if self.tts_all_commands:
-            self.say("Opening claw.", quiet)
         self._set_grab(True)
         self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
 
     def claw_close(self, quiet=False):
         self.print_stdout("claw_close()", quiet)
-        if self.tts_all_commands:
-            self.say("Closing claw.", quiet)
         self._set_grab(False)
         self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
 
@@ -250,8 +241,6 @@ class Gripp3r(EV3):
         block_message = "blocks"
         if -2 < blocks < 2:
             block_message = "block"
-        if self.tts_all_commands:
-            self.say("Moving {} {} forward.".format(blocks, block_message), quiet)
         period = blocks * self.block_length / speed
         self.move(period, speed, quiet=True)
 
@@ -262,15 +251,11 @@ class Gripp3r(EV3):
         block_message = "blocks"
         if blocks > -2 and blocks < 2:
             block_message = "block"
-        if self.tts_all_commands:
-            self.say("Moving {} {} backwards.".format(blocks, block_message), quiet)
         period = blocks * self.block_length / speed
         self.move(period, speed*-1, quiet=True)
 
     def turn_right(self, angle=90, quiet=False):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
-        if self.tts_all_commands:
-            self.say("Turning right {} degrees.".format(angle), quiet)
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000
@@ -332,8 +317,6 @@ class Gripp3r(EV3):
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
-        if self.tts_all_commands:
-            self.say("Turning left {} degrees.".format(angle), quiet)
 
         duty = 0.3  # Use fixed duty cycle for turning
         speed_sp = duty * 1000

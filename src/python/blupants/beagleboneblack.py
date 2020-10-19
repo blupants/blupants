@@ -31,6 +31,7 @@ class BeagleBoneBlack(robots_common.RobotHollow):
         self.name = self.config["name"]
         self.duty = self.config["duty"]
         self.block_length = self.config["block_length"]
+        self.enable_tts = self.config["enable_tts"]
         self.duty_ratio = self.config["beagleboneblack"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.03
         self.turn_right_period = self.config["beagleboneblack"]["motor"]["turn_right_period"]

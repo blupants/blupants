@@ -93,6 +93,7 @@ class BluPants(BeagleBoneBlue):
         super().reload()
         self.duty = self.config["duty"]
         self.block_length = self.config["block_length"]
+        self.enable_tts = self.config["enable_tts"]
         self.duty_ratio = self.config["beagleboneblue"]["motor"]["duty_ratio"]
         self.turn_right_period = self.config["beagleboneblue"]["motor"]["turn_right_period"]
         self.turn_left_period = self.config["beagleboneblue"]["motor"]["turn_left_period"]
@@ -246,7 +247,7 @@ class BluPants(BeagleBoneBlue):
 
     def say(self, message, quiet=False):
         self.print_stdout(message, quiet)
-        if not quiet:
+        if not quiet and self.enable_tts:
             try:
                 self.tts_engine.say(message)
                 self.tts_engine.runAndWait()

@@ -6,7 +6,7 @@
   "duty": 0.5,
   "block_length": 0.5,
   "period": 0.02,
-  "tts_all_commands": false,
+  "enable_tts": true,
   "bluetooth_addr": "",
   "ev3":
   {

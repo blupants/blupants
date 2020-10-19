@@ -30,6 +30,7 @@ class RaspberryPi(robots_common.RobotHollow):
         self.name = "RaspberryPi"
         self.duty = self.config["duty"]
         self.block_length = self.config["block_length"]
+        self.enable_tts = self.config["enable_tts"]
         self.duty_ratio = self.duty_ratio = self.config["raspberrypi"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.005
         self.turn_left_period = 0.005
@@ -261,7 +262,7 @@ class RaspberryPi(robots_common.RobotHollow):
 
     def say(self, message, quiet=False):
         self.print_stdout(message, quiet)
-        if not quiet:
+        if not quiet and self.enable_tts:
             try:
                 self.tts_engine.say(message)
                 self.tts_engine.runAndWait()
