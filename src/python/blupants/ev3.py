@@ -177,6 +177,8 @@ class Gripp3r(EV3):
         self.motor_back_right = self.config["ev3"]["motor"]["position"]["back_right"]
 
         self.grab = True
+        self._read_grab()
+
         self.servo_claw = "a"
         self.servo_claw_angle_open = -560
         self.servo_claw_angle_close = 560
@@ -185,6 +187,20 @@ class Gripp3r(EV3):
         self.servo_claw_angle_open = self.config["ev3"]["claw"]["angle_open"]
         self.servo_claw_angle_close = self.config["ev3"]["claw"]["angle_close"]
 
+    def _read_grab(self):
+        try:
+            with open("/tmp/blupants/grab", "r") as f:
+                self.grab = bool(f.read())
+        except:
+            pass
+
+    def _set_grab(self, val):
+        try:
+            self.grab = val
+            with open("/tmp/blupants/grab", "w") as f:
+                f.write(str(int(self.grab)))
+        except:
+            pass
 
     def claw_toggle(self, quiet=False):
         if self.grab:
@@ -199,14 +215,14 @@ class Gripp3r(EV3):
         self.print_stdout("claw_open()", quiet)
         if self.tts_all_commands:
             self.say("Opening claw.", quiet)
-        self.grab = True
+        self._set_grab(True)
         self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
 
     def claw_close(self, quiet=False):
         self.print_stdout("claw_close()", quiet)
         if self.tts_all_commands:
             self.say("Closing claw.", quiet)
-        self.grab = False
+        self._set_grab(False)
         self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
 
     def move(self, period=1, duty=1, quiet=False):

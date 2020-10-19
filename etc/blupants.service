@@ -8,3 +8,4 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 ExecStart=/etc/robotcontrol/start.sh
+ExecStop=/etc/robotcontrol/stop.sh
