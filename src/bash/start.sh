@@ -17,7 +17,7 @@ mkdir -p /var/lib/cloud9/BluPants
 ln -s /tmp/blupants/blupants_rpc.py /var/lib/cloud9/BluPants/blupants_rpc.py
 
 mkdir -p /var/blupants
-cp /var/blupants/grab /tmp/blupants/grab
+cp /var/blupants/state /tmp/blupants/state
 
 if ls /etc/blupants.json  1> /dev/null 2>&1; then
   cp $INSTALL_PATH/blupants.json /etc/blupants.json

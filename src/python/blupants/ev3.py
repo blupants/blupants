@@ -184,16 +184,18 @@ class Gripp3r(EV3):
 
     def _read_grab(self):
         try:
-            with open("/tmp/blupants/grab", "r") as f:
-                self.grab = bool(f.read())
+            with open("/tmp/blupants/state", "r") as f:
+                dict_state = json.load(f)
+                self.grab = dict_state["claw_is_open"]
         except:
             pass
 
     def _set_grab(self, val):
         try:
             self.grab = val
-            with open("/tmp/blupants/grab", "w") as f:
-                f.write(str(int(self.grab)))
+            dict_state = {"claw_is_open": self.grab}
+            with open("/tmp/blupants/state", "w") as f:
+                json.dump(dict_state, f)
         except:
             pass
 
@@ -208,13 +210,15 @@ class Gripp3r(EV3):
 
     def claw_open(self, quiet=False):
         self.print_stdout("claw_open()", quiet)
+        if self.grab == False:
+            self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
         self._set_grab(True)
-        self.set_servo(self.servo_claw, self.servo_claw_angle_open, quiet=True)
 
     def claw_close(self, quiet=False):
         self.print_stdout("claw_close()", quiet)
+        if self.grab == True:
+            self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
         self._set_grab(False)
-        self.set_servo(self.servo_claw, self.servo_claw_angle_close, quiet=True)
 
     def move(self, period=1, duty=1, quiet=False):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
