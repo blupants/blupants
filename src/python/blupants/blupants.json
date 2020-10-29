@@ -26,8 +26,8 @@
         "back_right": 3
       },
       "duty_ratio": [1.0, 1.0, 1.0, 1.0],
-      "turn_right_period": 0.015,
-      "turn_left_period": 0.015
+      "turn_right_period": 0.014,
+      "turn_left_period": 0.014
     },
     "camera":
     {

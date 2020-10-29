@@ -241,7 +241,6 @@ class Gripp3r(EV3):
 
     def move(self, period=1, duty=1, quiet=False):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
-        self.duty = duty
         speed_sp = duty * 1000
         time_sp = period * 1000
         for i in range(0, 4):
