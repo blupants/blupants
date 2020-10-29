@@ -71,6 +71,13 @@ class EV3(robots_common.RobotHollow):
         except:
             pass
 
+        self.ultrasonic_sensor = None
+        if self.infrared_sensor == None:
+            try:
+                self.ultrasonic_sensor = lego.UltrasonicSensor(sensor.INPUT_4)
+            except:
+                pass
+
         self.running = True
 
     def reload(self):
@@ -136,10 +143,22 @@ class EV3(robots_common.RobotHollow):
     def read_distance(self, quiet=False):
         self.print_stdout("read_distance()", quiet)
         distance = -1
+        try:
+            system = self.config.get("measurement_system").lower()
+        except:
+            system = "m"
+
         if self.infrared_sensor:
             distance = self.infrared_sensor.proximity
-        message = "Distance is {} centimeters.".format(int(distance))
-        self.print_stdout(message, quiet)
+        if self.ultrasonic_sensor:
+            if system == "r" or system == "i" or system == "b":
+                distance = self.ultrasonic_sensor.distance_centimeters
+            else:
+                distance = self.ultrasonic_sensor.distance_inches
+        if system == "r" or system == "i" or system == "b":
+            self.print_stdout("Distance: [{}] inches.".format(str(distance)), quiet)
+        else:
+            self.print_stdout("Distance: [{}] cm.".format(str(distance)), quiet)
         return distance
 
     def say(self, message, quiet=False):
