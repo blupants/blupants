@@ -20,10 +20,10 @@
     {
       "position":
       {
-        "front_left": 0,
-        "front_right": 1,
-        "back_left": 2,
-        "back_right": 3
+        "front_left": 1,
+        "front_right": 2,
+        "back_left": 3,
+        "back_right": 4
       },
       "duty_ratio": [1.0, 1.0, 1.0, 1.0],
       "turn_right_period": 0.014,
@@ -31,8 +31,8 @@
     },
     "camera":
     {
-      "servo_horizontal": "b",
-      "servo_vertical": "c"
+      "servo_horizontal": "c",
+      "servo_vertical": "d"
     }
   },
   "alphabot":

@@ -103,40 +103,40 @@ class EV3(robots_common.RobotHollow):
     def set_servo(self, i=1, angle=0.0, quiet=False):
         self.print_stdout("set_servo(i={}, angle={})".format(i, angle), quiet)
         if str(i).lower() == "a":
-            i = 1
-        if str(i).lower() == "b":
-            i = len(self.servos) - 2
-        if str(i).lower() == "c":
-            i = len(self.servos) - 1
-        if str(i).lower() == "d":
-            i = len(self.servos)
+            index = 0
+        elif str(i).lower() == "b":
+            index = len(self.servos) - 3
+        elif str(i).lower() == "c":
+            index = len(self.servos) - 2
+        elif str(i).lower() == "d":
+            index = len(self.servos) - 1
+        else:
+            index = i - 1
+
         try:
-            self.servos[i - 1].on_for_degrees(30, angle)
+            self.servos[index].on_for_degrees(30, angle)
         except:
             pass
         try:
-            self.servos[i - 1].wait_until_not_moving()
+            self.servos[index].wait_until_not_moving()
         except:
             pass
 
     def set_motor(self, i=1, duty=0.5, quiet=False):
         self.print_stdout("set_motor(i={}, duty={})".format(i, duty), quiet)
         if str(i).lower() == "a":
-            i = 1
-        if str(i).lower() == "b":
-            i = len(self.motors) - 2
-        if str(i).lower() == "c":
-            i = len(self.motors) - 1
-        if str(i).lower() == "d":
-            i = len(self.motors)
-        speed_sp = duty * 1000
-        time_sp = self.period * 1000
+            index = 0
+        elif str(i).lower() == "b":
+            index = len(self.motors) - 3
+        elif str(i).lower() == "c":
+            index = len(self.motors) - 2
+        elif str(i).lower() == "d":
+            index = len(self.motors) - 1
+        else:
+            index = i - 1
+
         try:
-            self.motors[i - 1].run_timed(time_sp=time_sp, speed_sp=speed_sp)
-        except:
-            pass
-        try:
-            self.motors[i - 1].wait_until_not_moving()
+            self.motors[index].run_direct(duty_cycle_sp=duty*100)
         except:
             pass
 
@@ -178,10 +178,10 @@ class Gripp3r(EV3):
         self.duty_ratio = self.config["ev3"]["motor"]["duty_ratio"]
         self.turn_right_period = 0.015
         self.turn_left_period = 0.015
-        self.motor_front_left = 0
-        self.motor_front_right = 1
-        self.motor_back_left = 2
-        self.motor_back_right = 3
+        self.motor_front_left = 1
+        self.motor_front_right = 2
+        self.motor_back_left = 3
+        self.motor_back_right = 4
 
         self.turn_right_period = self.config["ev3"]["motor"]["turn_right_period"]
         self.turn_left_period = self.config["ev3"]["motor"]["turn_left_period"]
@@ -189,6 +189,11 @@ class Gripp3r(EV3):
         self.motor_front_right = self.config["ev3"]["motor"]["position"]["front_right"]
         self.motor_back_left = self.config["ev3"]["motor"]["position"]["back_left"]
         self.motor_back_right = self.config["ev3"]["motor"]["position"]["back_right"]
+
+        self.motor_front_left -= 1
+        self.motor_front_right -= 1
+        self.motor_back_left -= 1
+        self.motor_back_right -= 1
 
         self.grab = True
         self._read_grab()
