@@ -17,15 +17,24 @@ try:
 except:
     import blupants.robots_common as robots_common
 
-
 class BeagleBoneBlue(robots_common.RobotHollow):
     def __init__(self):
         super().__init__()
+        self.servo_angle_factor = 0.015
         self.running = False
         self.reload()
         period = self.period
-        self.bbb_servos = [servo.Servo(1), servo.Servo(2), servo.Servo(3), servo.Servo(4), servo.Servo(5),
-                           servo.Servo(6), servo.Servo(7), servo.Servo(8)]
+
+        init_angles = []
+        self.cur_angles = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
+        for i in range(0,8):
+            ang = 0
+            if len(self.cur_angles) > i:
+                ang = self.cur_angles[i] * self.servo_angle_factor
+            init_angles.append(ang)
+
+        self.bbb_servos = [servo.Servo(1, init_angles[0]), servo.Servo(2, init_angles[1]), servo.Servo(3, init_angles[2]), servo.Servo(4, init_angles[3]),
+                           servo.Servo(5, init_angles[4]), servo.Servo(6, init_angles[5]), servo.Servo(7, init_angles[6]), servo.Servo(8, init_angles[7])]
 
         self.clcks = [clock.Clock(self.bbb_servos[0], period), clock.Clock(self.bbb_servos[1], period),
                       clock.Clock(self.bbb_servos[2], period), clock.Clock(self.bbb_servos[3], period),
@@ -51,6 +60,7 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         super().reload()
         self.name = self.config["name"]
         self.period = self.config["period"]
+        self.cur_angles = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -74,8 +84,9 @@ class BeagleBoneBlue(robots_common.RobotHollow):
             angle = 90
         if angle < 0 and angle < -90:
             angle = -90
-        position = angle * 0.015
+        position = angle * self.servo_angle_factor
         self.bbb_servos[i - 1].set(position)
+        self.cur_angles[i -1] = angle
         time.sleep(0.2)
 
     def set_motor(self, i=1, duty=0.5, quiet=False):
@@ -255,6 +266,117 @@ class BluPants(BeagleBoneBlue):
                 pass
 
 
+class BluPants6DOF(BluPants):
+    def __init__(self):
+        super().__init__()
+        self.reload()
+
+    def reload(self):
+        super().reload()
+        self.servo_claw_angle_open = 0
+        self.servo_claw_angle_open = self.config["beagleboneblue"]["claw"]["angle_open"]
+        self.servo_claw_angle_close = 60.0
+        self.servo_claw_angle_close = self.config["beagleboneblue"]["claw"]["angle_close"]
+        self.grab = True
+
+        self.rest_arm = [
+            {"servo": 3, "angle": self.cur_angles[2], "step": 10},
+            {"servo": 4, "angle": self.cur_angles[3], "step": 10},
+            {"servo": 5, "angle": self.cur_angles[4], "step": 10},
+            {"servo": 6, "angle": self.cur_angles[5], "step": 10},
+        ]
+
+        self.arm_ready = json.loads(json.dumps(self.rest_arm))
+        self.arm_ready[2]["angle"] = -60
+
+    def _revert_servo_config(self, config):
+        return self._move_servo_config(config, True)
+
+    def _move_servo_config(self, config, revert=False):
+        s = config["servo"]
+        i = self.cur_angles[s-1]
+        e = config["angle"]
+        step = config["step"]
+        if revert:
+            e = self.cur_angles[s-1]
+            i = config["angle"]
+        if i > e:
+            step = step * -1
+        for i in range(int(i), int(e), int(step)):
+            self.set_servo(s, i)
+        self.set_servo(s, e)
+
+    def move_arm(self, config, revert=False):
+        from multiprocessing.dummy import Pool as ThreadPool
+
+        # Make the Pool of workers
+        n_workers = len(config)
+        pool = ThreadPool(n_workers)
+
+        # Open the URLs in their own threads
+        # and return the results
+        if revert:
+            results = pool.map(self._revert_servo_config, config)
+        else:
+            results = pool.map(self._move_servo_config, config)
+
+        # Close the pool and wait for the work to finish
+        pool.close()
+        pool.join()
+
+    def move(self, period=1, duty=1, quiet=False):
+        self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
+        step = duty * 10
+        if step < 0:
+            step *= -1
+            period *= -1
+        conf = [
+            {"servo": 3, "angle": self.cur_angles[2] - (period*10), "step": step},
+            {"servo": 4, "angle": self.cur_angles[3] + (period*10), "step": step},
+            {"servo": 5, "angle": self.cur_angles[4] + (period*10), "step": step},
+        ]
+        self.move_arm(conf)
+
+
+    def nod(self, quick=False):
+        r.claw_toggle()
+        r.claw_toggle()
+        if quick:
+            return
+        r.set_servo(2, 90)
+        r.set_servo(2, -90)
+        r.set_servo(2, 0)
+        r.claw_toggle()
+        r.claw_toggle()
+
+    def say_yes(self, quiet=False):
+        self.print_stdout("say_yes()", quiet)
+        self.say("Yes!", quiet)
+        self.nod()
+
+    def say_no(self, quiet=False):
+        self.print_stdout("say_no()", quiet)
+        self.say("No!", quiet)
+        self.nod(True)
+
+
+    def turn_right(self, angle=90, quiet=False):
+        self.print_stdout("turn_right(angle={})".format(angle), quiet)
+        if angle > 0:
+            angle = angle * -1
+        self.set_servo(6, angle)
+
+    def turn_left(self, angle=90, quiet=False):
+        self.print_stdout("turn_left(angle={})".format(angle), quiet)
+        if angle < 0:
+            angle = angle * -1
+        self.set_servo(6, angle)
+
+    def shutdown(self, quiet=False):
+        time.sleep(2)
+        super().shutdown(quiet)
+
+
 class BluPantsCar(BluPants):
     def __init__(self):
         super().__init__()
@@ -287,7 +409,7 @@ class BluPantsCar(BluPants):
             angle = 90
         if angle < 0 and angle < -90:
             angle = -90
-        position = angle * 0.015
+        position = angle * self.servo_angle_factor
         self.set_servo(self.servo_horizontal, position, quiet=True)
         self.set_servo(self.servo_vertical, 0, quiet=True)
         self.sleep(0.2, quiet=True)
@@ -421,3 +543,20 @@ class EduMIP(BluPants):
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
 
 
+r = BluPants6DOF()
+
+r.move_forward(2)
+r.turn_right(45)
+r.move_forward(2)
+r.turn_left(90)
+r.move_backwards(3)
+r.turn_left(90)
+r.move_forward(1)
+r.move_arm(r.rest_arm)
+
+# r.move_arm(r.arm_ready)
+# r.move_arm(r.rest_arm)
+# # r.turn_left()
+# # r.say_yes()
+# # r.turn_left(0)
+r.shutdown()
