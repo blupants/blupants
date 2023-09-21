@@ -77,6 +77,8 @@ if robot_id == 5:
     robot_class = "beagleboneblack"
 if robot_id == 6:
     robot_class = "alphabot2"
+if robot_id == 7:
+    robot_class = "beagleboneblue_6dof_claw"
 
 
 def _get_pacmd_arg(mem_file):

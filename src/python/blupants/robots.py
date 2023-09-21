@@ -322,6 +322,10 @@ try:
     factory.register_robot("edumip", beagleboneblue.EduMIP)
 except:
     pass
+try:
+    factory.register_robot("beagleboneblue_6dof_claw", beagleboneblue.BluPants6DOF)
+except:
+    pass
 
 try:
     import raspberrypi

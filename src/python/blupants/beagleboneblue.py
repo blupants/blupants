@@ -581,23 +581,23 @@ class EduMIP(BluPants):
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
 
 
-r = BluPants6DOF()
-
-r.move_arm(r.arm_ready_pos)
-r.say_yes()
-d = r.read_distance()
-r.turn_left()
-r.say_no()
-r.turn_left(0)
-
-r.move_forward(2)
-r.turn_right(45)
-r.claw_toggle()
-r.move_forward(2)
-r.turn_left(45)
-r.claw_toggle()
-r.move_backwards(3)
-r.turn_right(60)
-r.move_forward(1)
-
-r.shutdown()
+# r = BluPants6DOF()
+#
+# r.move_arm(r.arm_ready_pos)
+# r.say_yes()
+# d = r.read_distance()
+# r.turn_left()
+# r.say_no()
+# r.turn_left(0)
+#
+# r.move_forward(2)
+# r.turn_right(45)
+# r.claw_toggle()
+# r.move_forward(2)
+# r.turn_left(45)
+# r.claw_toggle()
+# r.move_backwards(3)
+# r.turn_right(60)
+# r.move_forward(1)
+#
+# r.shutdown()
