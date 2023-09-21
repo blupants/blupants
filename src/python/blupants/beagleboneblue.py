@@ -27,7 +27,7 @@ class BeagleBoneBlue(robots_common.RobotHollow):
 
         init_angles = []
         self.cur_angles = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
-        for i in range(0,8):
+        for i in range(0, 8):
             ang = 0
             if len(self.cur_angles) > i:
                 ang = self.cur_angles[i] * self.servo_angle_factor
@@ -269,6 +269,9 @@ class BluPants(BeagleBoneBlue):
 class BluPants6DOF(BluPants):
     def __init__(self):
         super().__init__()
+        self.base_servo_index = -1
+        self.arm_rest_pos = {}
+        self.arm_ready_pos = {}
         self.reload()
 
     def reload(self):
@@ -279,75 +282,109 @@ class BluPants6DOF(BluPants):
         self.servo_claw_angle_close = self.config["beagleboneblue"]["claw"]["angle_close"]
         self.grab = True
 
-        self.rest_arm = [
-            {"servo": 3, "angle": self.cur_angles[2], "step": 10},
-            {"servo": 4, "angle": self.cur_angles[3], "step": 10},
-            {"servo": 5, "angle": self.cur_angles[4], "step": 10},
-            {"servo": 6, "angle": self.cur_angles[5], "step": 10},
-        ]
+        rest_ang = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
 
-        self.arm_ready = json.loads(json.dumps(self.rest_arm))
-        self.arm_ready[2]["angle"] = -60
+        self.base_servo_index = self.servo_claw - 5
+        self.arm_rest_pos = {}
+        # i   Description                        pin/rail/s
+        # 1   camera servo_horizontal            0
+        # 2   camera servo_vertical              1
+        # 3   base servo (left/right)            2
+        # 4   lower joint                        3
+        # 5   upper base joint                   4
+        # 6   claw joint                         5
+        # 7   claw spin                          6
+        # 8   claw open/close (self.servo_claw)  7
+        for i in range(self.base_servo_index, self.servo_claw + 1):
+            self.arm_rest_pos[str(i)] = {"angle": rest_ang[i-1], "step": 10}
 
-    def _revert_servo_config(self, config):
-        return self._move_servo_config(config, True)
+        lower_joint = "4"
+        self.arm_ready_pos = json.loads(json.dumps(self.arm_rest_pos))
+        self.arm_ready_pos[lower_joint]["angle"] = -60
 
-    def _move_servo_config(self, config, revert=False):
-        s = config["servo"]
-        i = self.cur_angles[s-1]
-        e = config["angle"]
-        step = config["step"]
+    def _is_equal_current_pos(self, pos):
+        for i in pos:
+            s = int(i)-1
+            conf = pos[i]
+            cur = self.cur_angles[s]
+            conf_pos = conf.get("angle", -1)
+            if int(cur) != int(conf_pos):
+                return False
+        return True
+
+    def _revert_servos_pos(self, pos):
+        return self._move_servo_config(pos, True)
+
+    def _move_servos_pos(self, pos, revert=False):
+        s = int(pos["servo"])
+        i = int(self.cur_angles[s-1])
+        e = int(pos["angle"])
+        step = int(pos["step"])
         if revert:
-            e = self.cur_angles[s-1]
-            i = config["angle"]
+            tmp = e
+            e = i
+            i = tmp
         if i > e:
             step = step * -1
-        for i in range(int(i), int(e), int(step)):
+        for i in range(i, e, step):
             self.set_servo(s, i)
         self.set_servo(s, e)
 
-    def move_arm(self, config, revert=False):
+    def move_arm(self, pos, revert=False):
         from multiprocessing.dummy import Pool as ThreadPool
 
+        pos_array = []
+        for s in pos:
+            item = pos[s]
+            item["servo"] = s
+            pos_array.append(item)
+
         # Make the Pool of workers
-        n_workers = len(config)
+        n_workers = len(pos_array)
         pool = ThreadPool(n_workers)
 
         # Open the URLs in their own threads
         # and return the results
         if revert:
-            results = pool.map(self._revert_servo_config, config)
+            results = pool.map(self._revert_servos_pos, pos_array)
         else:
-            results = pool.map(self._move_servo_config, config)
+            results = pool.map(self._move_servos_pos, pos_array)
 
         # Close the pool and wait for the work to finish
         pool.close()
         pool.join()
 
+        return results
+
     def move(self, period=1, duty=1, quiet=False):
         self.print_stdout("move(period={}, duty={})".format(period, duty), quiet)
+
+        # Arm cannot "move forward" at the "arm_ready_pos"
+        if self._is_equal_current_pos(self.arm_ready_pos):
+            self.move_arm(self.arm_rest_pos)
+
         step = duty * 10
         if step < 0:
             step *= -1
             period *= -1
-        conf = [
-            {"servo": 3, "angle": self.cur_angles[2] - (period*10), "step": step},
-            {"servo": 4, "angle": self.cur_angles[3] + (period*10), "step": step},
-            {"servo": 5, "angle": self.cur_angles[4] + (period*10), "step": step},
-        ]
-        self.move_arm(conf)
-
+        i = self.base_servo_index
+        pos = {
+            i+1: {"angle": self.cur_angles[i] + (period*10), "step": step},
+            i+2: {"angle": self.cur_angles[i+1] + (period*10), "step": step},
+            i+3: {"angle": self.cur_angles[i+2] - (period*10), "step": step},
+        }
+        self.move_arm(pos)
 
     def nod(self, quick=False):
-        r.claw_toggle()
-        r.claw_toggle()
+        self.claw_toggle()
+        self.claw_toggle()
         if quick:
             return
-        r.set_servo(2, 90)
-        r.set_servo(2, -90)
-        r.set_servo(2, 0)
-        r.claw_toggle()
-        r.claw_toggle()
+        self.set_servo(7, 90)
+        self.set_servo(7, -90)
+        self.set_servo(7, 0)
+        self.claw_toggle()
+        self.claw_toggle()
 
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
@@ -364,15 +401,17 @@ class BluPants6DOF(BluPants):
         self.print_stdout("turn_right(angle={})".format(angle), quiet)
         if angle > 0:
             angle = angle * -1
-        self.set_servo(6, angle)
+        self.set_servo(3, angle)
 
     def turn_left(self, angle=90, quiet=False):
         self.print_stdout("turn_left(angle={})".format(angle), quiet)
         if angle < 0:
             angle = angle * -1
-        self.set_servo(6, angle)
+        self.set_servo(3, angle)
 
     def shutdown(self, quiet=False):
+        self.nod(True)
+        self.move_arm(self.arm_rest_pos)
         time.sleep(2)
         super().shutdown(quiet)
 
@@ -545,18 +584,21 @@ class EduMIP(BluPants):
 
 r = BluPants6DOF()
 
+r.move_arm(r.arm_ready_pos)
+r.say_yes()
+
+r.turn_left()
+r.say_no()
+r.turn_left(0)
+
 r.move_forward(2)
 r.turn_right(45)
+r.claw_toggle()
 r.move_forward(2)
-r.turn_left(90)
+r.turn_left(45)
+r.claw_toggle()
 r.move_backwards(3)
-r.turn_left(90)
+r.turn_right(60)
 r.move_forward(1)
-r.move_arm(r.rest_arm)
 
-# r.move_arm(r.arm_ready)
-# r.move_arm(r.rest_arm)
-# # r.turn_left()
-# # r.say_yes()
-# # r.turn_left(0)
 r.shutdown()
