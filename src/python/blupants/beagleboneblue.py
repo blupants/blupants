@@ -25,16 +25,16 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         self.reload()
         period = self.period
 
-        init_angles = []
-        self.cur_angles = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
+        init_servo_duty = []
+        self.cur_angles = self.config.get("beagleboneblue", {}).get("servo", {}).get("init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
         for i in range(0, 8):
             ang = 0
             if len(self.cur_angles) > i:
                 ang = self.cur_angles[i] * self.servo_angle_factor
-            init_angles.append(ang)
+            init_servo_duty.append(ang)
 
-        self.bbb_servos = [servo.Servo(1, init_angles[0]), servo.Servo(2, init_angles[1]), servo.Servo(3, init_angles[2]), servo.Servo(4, init_angles[3]),
-                           servo.Servo(5, init_angles[4]), servo.Servo(6, init_angles[5]), servo.Servo(7, init_angles[6]), servo.Servo(8, init_angles[7])]
+        self.bbb_servos = [servo.Servo(1, init_servo_duty[0]), servo.Servo(2, init_servo_duty[1]), servo.Servo(3, init_servo_duty[2]), servo.Servo(4, init_servo_duty[3]),
+                           servo.Servo(5, init_servo_duty[4]), servo.Servo(6, init_servo_duty[5]), servo.Servo(7, init_servo_duty[6]), servo.Servo(8, init_servo_duty[7])]
 
         self.clcks = [clock.Clock(self.bbb_servos[0], period), clock.Clock(self.bbb_servos[1], period),
                       clock.Clock(self.bbb_servos[2], period), clock.Clock(self.bbb_servos[3], period),
@@ -60,7 +60,6 @@ class BeagleBoneBlue(robots_common.RobotHollow):
         super().reload()
         self.name = self.config["name"]
         self.period = self.config["period"]
-        self.cur_angles = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
 
     def shutdown(self, quiet=False):
         self.print_stdout("shutdown(quiet={})".format(quiet), quiet)
@@ -282,7 +281,7 @@ class BluPants6DOF(BluPants):
         self.servo_claw_angle_close = self.config["beagleboneblue"]["claw"]["angle_close"]
         self.grab = True
 
-        rest_ang = self.config.get("beagleboneblue", {}).get("servos_init_angle", [0, 0, 0, 0, 0, 0, 0, 0])
+        rest_ang = self.config.get("beagleboneblue", {}).get("servo", {}).get("init_angle", [0, 0, 0, 15, -90, 90, 0, 0])
 
         self.base_servo_index = self.servo_claw - 5
         self.arm_rest_pos = {}
@@ -586,7 +585,7 @@ r = BluPants6DOF()
 
 r.move_arm(r.arm_ready_pos)
 r.say_yes()
-
+d = r.read_distance()
 r.turn_left()
 r.say_no()
 r.turn_left(0)
