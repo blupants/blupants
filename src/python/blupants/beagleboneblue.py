@@ -311,25 +311,44 @@ class BluPants6DOF(BluPants):
                 return False
         return True
 
-    def _revert_servos_pos(self, pos):
-        return self._move_servo_config(pos, True)
-
-    def _move_servos_pos(self, pos, revert=False):
+    def _move_servos_pos(self, pos):
         s = int(pos["servo"])
         i = int(self.cur_angles[s-1])
         e = int(pos["angle"])
         step = int(pos["step"])
-        if revert:
-            tmp = e
-            e = i
-            i = tmp
         if i > e:
             step = step * -1
         for i in range(i, e, step):
             self.set_servo(s, i)
         self.set_servo(s, e)
 
-    def move_arm(self, pos, revert=False):
+    def get_servos_pos(self, pos_name=None, fmt="array"):
+        pos = self.cur_angles
+        if pos_name:
+            if str(pos_name).lower().find("ready") != -1:
+                if fmt.lower() == "json".lower():
+                    return self.arm_ready_pos
+                else:
+                    pos = []
+                    for i in range(1, 9):
+                        pos.append(self.arm_ready_pos.get(str(i), {}).get("angle", 0))
+
+            if str(pos_name).lower().find("rest") != -1:
+                if fmt.lower() == "json".lower():
+                    return self.arm_rest_pos
+                else:
+                    pos = []
+                    for i in range(1, 9):
+                        pos.append(self.arm_rest_pos.get(str(i), {}).get("angle", 0))
+        else:
+            if fmt.lower()=="json".lower():
+                result = {}
+                for s,ang in enumerate(pos):
+                    result[s] =  {"angle": ang, "step": 10}
+                pos = result
+        return pos
+
+    def move_arm(self, pos):
         from multiprocessing.dummy import Pool as ThreadPool
 
         pos_array = []
@@ -342,12 +361,9 @@ class BluPants6DOF(BluPants):
         n_workers = len(pos_array)
         pool = ThreadPool(n_workers)
 
-        # Open the URLs in their own threads
+        # Move servos in their own threads
         # and return the results
-        if revert:
-            results = pool.map(self._revert_servos_pos, pos_array)
-        else:
-            results = pool.map(self._move_servos_pos, pos_array)
+        results = pool.map(self._move_servos_pos, pos_array)
 
         # Close the pool and wait for the work to finish
         pool.close()
@@ -581,8 +597,21 @@ class EduMIP(BluPants):
         self.set_servo(self.servo_shoulder_left, 0, quiet=True)
 
 
-# r = BluPants6DOF()
-#
+#r = BluPants6DOF()
+
+# ap = r.get_servos_pos()
+# print(ap)
+# ap = r.get_servos_pos(fmt="json")
+# print(ap)
+# ap = r.get_servos_pos("arm_ready_pos")
+# print(ap)
+# ap = r.get_servos_pos("arm_ready_pos", fmt="json")
+# print(ap)
+# ap = r.get_servos_pos("arm_rest_pos")
+# print(ap)
+# ap = r.get_servos_pos("arm_rest_pos", fmt="json")
+# print(ap)
+
 # r.move_arm(r.arm_ready_pos)
 # r.say_yes()
 # d = r.read_distance()
@@ -599,5 +628,5 @@ class EduMIP(BluPants):
 # r.move_backwards(3)
 # r.turn_right(60)
 # r.move_forward(1)
-#
-# r.shutdown()
+
+#r.shutdown()

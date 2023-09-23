@@ -229,6 +229,12 @@ class RobotHollow:
     def move(self, period=1, duty=1):
         self._warning("move")
 
+    def get_servos_pos(self, pos_name=None, fmt="array"):
+        self._warning("get_servos_pos")
+
+    def move_arm(self, pos):
+        self._warning("move_arm")
+
     def camera_toggle(self):
         self._warning("camera_toggle")
 
