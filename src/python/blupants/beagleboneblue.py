@@ -319,8 +319,8 @@ class BluPants6DOF(BluPants):
         if i > e:
             step = step * -1
         for i in range(i, e, step):
-            self.set_servo(s, i)
-        self.set_servo(s, e)
+            self.set_servo(s, i, True)
+        self.set_servo(s, e, True)
 
     def get_servos_pos(self, pos_name=None, fmt="array"):
         pos = self.cur_angles
@@ -348,7 +348,8 @@ class BluPants6DOF(BluPants):
                 pos = result
         return pos
 
-    def move_arm(self, pos):
+    def move_arm(self, pos, quiet=False):
+        self.print_stdout("move_arm(pos={})".format(pos), quiet)
         from multiprocessing.dummy import Pool as ThreadPool
 
         pos_array = []
@@ -388,18 +389,19 @@ class BluPants6DOF(BluPants):
             i+2: {"angle": self.cur_angles[i+1] + (period*10), "step": step},
             i+3: {"angle": self.cur_angles[i+2] - (period*10), "step": step},
         }
-        self.move_arm(pos)
+        self.move_arm(pos, quiet=True)
 
-    def nod(self, quick=False):
-        self.claw_toggle()
-        self.claw_toggle()
+    def nod(self, quick=False, quiet=False):
+        self.print_stdout("nod(quick={})".format(quick), quiet)
+        self.claw_toggle(quiet=True)
+        self.claw_toggle(quiet=True)
         if quick:
             return
-        self.set_servo(7, 90)
-        self.set_servo(7, -90)
-        self.set_servo(7, 0)
-        self.claw_toggle()
-        self.claw_toggle()
+        self.set_servo(7, 90, quiet=True)
+        self.set_servo(7, -90, quiet=True)
+        self.set_servo(7, 0, quiet=True)
+        self.claw_toggle(quiet=True)
+        self.claw_toggle(quiet=True)
 
     def say_yes(self, quiet=False):
         self.print_stdout("say_yes()", quiet)
@@ -425,8 +427,8 @@ class BluPants6DOF(BluPants):
         self.set_servo(3, angle)
 
     def shutdown(self, quiet=False):
-        self.nod(True)
-        self.move_arm(self.arm_rest_pos)
+        self.nod(True, quiet)
+        self.move_arm(self.arm_rest_pos, quiet)
         time.sleep(2)
         super().shutdown(quiet)
 
