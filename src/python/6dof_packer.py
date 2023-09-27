@@ -37,8 +37,6 @@ def random_behavior():
             robot.turn_right(45)
             robot.set_servo(7, 60)
             robot.set_servo(7, cur_angles[6])
-            robot.turn_left(30)
-            robot.sleep(1)
             robot.turn_left(0)
         if rand1 == 5:
             robot.turn_right(80)
@@ -82,8 +80,6 @@ def random_behavior():
             robot.set_servo(7, cur_angles[6])
             robot.claw_toggle()
             robot.set_servo(6, cur_angles[5])
-            robot.turn_left(30)
-            robot.sleep(1)
             robot.turn_left(0)
 
 def put_in_the_bag():
@@ -108,32 +104,35 @@ def put_in_the_bag():
     robot.claw_open()
     robot.sleep(0.1)
     robot.turn_left(0)
-    robot.set_servo(6, servo6_pos)
-    robot.set_servo(5, servo5_pos)
-    robot.set_servo(4, servo4_pos)
+    # robot.set_servo(6, servo6_pos)
+    # robot.set_servo(5, servo5_pos)
+    # robot.set_servo(4, servo4_pos)
     robot.move_arm(arm_ready_pos)
     robot.say("Bag is ready to pick-up!")
 
-d = 20
-print(d)
+d = -1
 prev_distance = d
 
 arm_ready_pos = robot.get_servos_pos("arm_ready_pos", fmt="json")
 arm_rest_pos = robot.get_servos_pos("arm_rest_pos", fmt="json")
 robot.move_arm(arm_ready_pos)
 robot.sleep(3)
-if d > 10 and prev_distance > 10:
-    robot.say_yes()
+robot.say_yes()
 
-while d > 10 and prev_distance > 10:
-    if not (d > 10 and prev_distance > 10):
-        robot.say("Too close, good bye!")
+running = True
+while running:
     prev_distance = d
     d = robot.read_distance()
-    robot.sleep(1)
-    if 10 < d < 30:
+    if d <= 0:
+        d = 100
+    robot.sleep(2)
+    if 10 < d < 20 and 10 < prev_distance < 20:
         put_in_the_bag()
         robot.say("Found item within range!")
     else:
         #robot.say("Nothing to do. d={d}".format(d=d))
         random_behavior()
+
+    if d < 5 and prev_distance < 5:
+        running = False
+        robot.say("Too close, good bye!")
