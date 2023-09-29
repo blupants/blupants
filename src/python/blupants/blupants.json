@@ -177,6 +177,10 @@
     {
       "servo_horizontal": 1,
       "servo_vertical": 2
+    },
+    "servo":
+    {
+      "init_angle": [0, 0, 0, 15, -90, 90, 0, 0]
     }
   },
   "EduMIP":

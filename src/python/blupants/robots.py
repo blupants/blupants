@@ -241,6 +241,30 @@ class Robot(robots_common.RobotHollow):
         """
         return self._robot.move(period, duty)
 
+    def get_servos_pos(self, pos_name=None, fmt="array"):
+        """
+        get_servos_pos(pos_name, fmt)
+
+        Get the current position (angle) for all servos.
+        """
+        return self._robot.get_servos_pos(pos_name, fmt)
+
+    def move_arm(self, pos):
+        """
+        move_arm(pos)
+
+        Incrementally set all servos step-by-step to the position provided as input.
+
+        Example. Move servo 1 from current position to 90 degrees incrementing 10
+        degrees each step. Move servo 2 to -60 degrees with 10 degrees step.
+        pos = {
+            1: {"angle": 90, "step": 10},
+            2: {"angle": -60, "step": 10},
+        }
+        robot.move_arm(pos)
+        """
+        return self._robot.move_arm(pos)
+
     def camera_toggle(self):
         """
         camera_toggle()
@@ -320,6 +344,10 @@ except:
     pass
 try:
     factory.register_robot("edumip", beagleboneblue.EduMIP)
+except:
+    pass
+try:
+    factory.register_robot("beagleboneblue_6dof_claw", beagleboneblue.BluPants6DOF)
 except:
     pass
 
