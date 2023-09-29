@@ -1,9 +1,15 @@
+import json
 import random
 global arm_ready_pos, arm_rest_pos
 
 
 def random_behavior():
     global robot
+    global arm_ready_pos, arm_rest_pos
+    arm_ready_pos_slow = json.loads(json.dumps(arm_ready_pos))
+    for i in arm_ready_pos_slow:
+        print(arm_ready_pos_slow[i])
+        arm_ready_pos_slow[i]["step"] = 3
     max_range = 10
     cur_angles = robot.get_servos_pos()[:]
     rand_main = random.randint(0, max_range)
@@ -26,24 +32,24 @@ def random_behavior():
             robot.set_servo(7, 90)
             robot.set_servo(7, cur_angles[6])
             robot.claw_toggle()
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 3:
             robot.turn_left(90)
             robot.set_servo(7, 90)
             robot.set_servo(7, -90)
             robot.set_servo(7, cur_angles[6])
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 4:
             robot.turn_right(45)
             robot.set_servo(7, 60)
             robot.set_servo(7, cur_angles[6])
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 5:
             robot.turn_right(80)
             robot.sleep(2)
             robot.turn_left(30)
             robot.sleep(1)
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 6:
             robot.turn_left(45)
             robot.set_servo(7, 90)
@@ -52,7 +58,7 @@ def random_behavior():
             robot.turn_right(45)
             robot.turn_left(30)
             robot.sleep(1)
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 7:
             robot.set_servo(6, 60)
             robot.set_servo(6, cur_angles[5])
@@ -71,7 +77,7 @@ def random_behavior():
             robot.set_servo(7, cur_angles[6])
             robot.claw_toggle()
             robot.set_servo(6, cur_angles[5])
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
         if rand1 == 10:
             robot.turn_right(30)
             robot.set_servo(6, 70)
@@ -80,7 +86,7 @@ def random_behavior():
             robot.set_servo(7, cur_angles[6])
             robot.claw_toggle()
             robot.set_servo(6, cur_angles[5])
-            robot.turn_left(0)
+            robot.move_arm(arm_ready_pos_slow)
 
 def put_in_the_bag():
     global robot
