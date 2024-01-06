@@ -79,6 +79,8 @@ if robot_id == 6:
     robot_class = "alphabot2"
 if robot_id == 7:
     robot_class = "beagleboneblue_6dof_claw"
+if robot_id == 8:
+    robot_class = "chipy"
 
 
 def _get_pacmd_arg(mem_file):
@@ -367,6 +369,7 @@ def web_server():
 
 
 def main():
+    run()
     thread1 = threading.Thread(target=run)
     thread2 = threading.Thread(target=web_server)
 

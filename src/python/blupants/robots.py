@@ -408,3 +408,16 @@ try:
     factory.register_robot("alphabot2", alphabot2.AlphaBot2)
 except:
     pass
+
+
+try:
+    import chipy
+except:
+    try:
+        import blupants.chipy as chipy
+    except:
+        pass
+try:
+    factory.register_robot("chipy", chipy.ChiPy)
+except:
+    pass
